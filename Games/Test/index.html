@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Coin Rush</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;font-family:Arial,sans-serif;background:#1689f8;color:white;touch-action:none}
+canvas{display:block;width:100vw;height:100dvh}
+#hud{position:absolute;top:15px;left:15px;right:15px;display:flex;justify-content:space-between;align-items:center;gap:8px;pointer-events:none}
+.panel{background:#073775dd;padding:12px 16px;border-radius:16px;font-weight:bold;font-size:18px}
+#buttons{position:absolute;bottom:22px;left:0;right:0;display:flex;justify-content:space-between;padding:0 24px}
+button{border:2px solid #ffffffbb;background:#0754a9aa;color:white;border-radius:50%;width:72px;height:72px;font-size:28px;font-weight:bold;touch-action:none}
+#jump{width:90px;height:90px;font-size:35px}
+#overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#001c4a99}
+.box{text-align:center;background:#083b78;padding:28px;border:2px solid #70d9ff;border-radius:24px;width:min(85%,340px);box-shadow:0 10px 40px #001b48}
+h1{font-size:35px;margin:0 0 12px;color:#ffe84c}
+#start{width:auto;height:auto;border-radius:14px;padding:15px 30px;background:#15b8ff;font-size:20px}
+.small{opacity:.8;font-size:14px}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="hud">
+ <div class="panel">🪙 <span id="score">0</span></div>
+ <div class="panel">🏆 <span id="best">0</span></div>
+</div>
+<div id="buttons">
+ <div><button id="left">◀</button> <button id="right">▶</button></div>
+ <button id="jump">⬆</button>
+</div>
+<div id="overlay">
+ <div class="box">
+  <h1>COIN RUSH</h1>
+  <p>Altınları topla, bombalardan kaç!</p>
+  <p id="result">En yüksek skor: 0</p>
+  <button id="start">OYNA!</button>
+  <p class="small">Hareket et ve zıpla!</p>
+ </div>
+</div>
+<script>
+const c=document.getElementById('game'),ctx=c.getContext('2d');
+const scoreEl=document.getElementById('score');
+const bestEl=document.getElementById('best');
+const overlay=document.getElementById('overlay');
+const result=document.getElementById('result');
+let W,H,scale,player,items,score,best=0,running=false;
+let left=false,right=false,frame=0,speed=3,last=0;
+try{best=Number(localStorage.getItem('coinrush_best'))||0}catch(e){}
+bestEl.textContent=best;
+function resize(){
+ scale=devicePixelRatio||1;W=innerWidth;H=innerHeight;
+ c.width=W*scale;c.height=H*scale;
+ ctx.setTransform(scale,0,0,scale,0,0);
+}
+addEventListener('resize',resize);resize();
+function reset(){
+ player={x:W*.2,y:H*.65,w:34,h:38,vy:0,ground:false};
+ items=[];score=0;frame=0;speed=3;last=0;
+ scoreEl.textContent=0;running=true;overlay.style.display='none';
+}
+function spawn(){
+ const bomb=Math.random()<.25;
+ items.push({x:W+30,y:H*.57+Math.random()*H*.17,r:bomb?17:13,bomb,
+ taken:false});
+}
+function drawBackground(){
+ const g=ctx.createLinearGradient(0,0,0,H);
+ g.addColorStop(0,'#1685f8');g.addColorStop(1,'#83e6ff');
+ ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ for(let i=0;i<8;i++){
+  let x=(i*125-frame*.25)%(W+140);
+  ctx.fillStyle='#ffffff30';
+  ctx.beginPath();ctx.arc(x,H*.22+i%3*35,25,0,7);ctx.fill();
+ }
+ ctx.fillStyle='#1783c5';
+ ctx.fillRect(0,H*.83,W,H*.17);
+ ctx.fillStyle='#41d878';
+ ctx.fillRect(0,H*.82,W,12);
+}
+function drawPlayer(){
+ ctx.save();ctx.translate(player.x,player.y);
+ ctx.fillStyle='#062d67';ctx.fillRect(-3,-3,40,44);
+ ctx.fillStyle='#f6fcff';ctx.fillRect(0,0,34,38);
+ ctx.fillStyle='#073775';ctx.fillRect(8,10,5,12);ctx.fillRect(22,10,5,12);
+ ctx.restore();
+}
+function loop(t){
+ requestAnimationFrame(loop);
+ const dt=Math.min((t-(last||t))/16.67,2);last=t;
+ drawBackground();
+ if(!running)return;
+ frame+=dt;
+ if(frame>48){spawn();frame=0;speed=Math.min(7,speed+.025)}
+ player.vy+=.65*dt;
+ player.y+=player.vy*dt;
+ if(player.y+player.h>H*.82){
+  player.y=H*.82-player.h;player.vy=0;player.ground=true;
+ }else player.ground=false;
+ if(left)player.x-=4*dt;
+ if(right)player.x+=4*dt;
+ player.x=Math.max(0,Math.min(W-player.w,player.x));
+ items.forEach(it=>{
+  it.x-=speed*dt;
+  if(!it.taken&&Math.abs(it.x-player.x-player.w/2)<it.r+17&&
+    Math.abs(it.y-player.y-player.h/2)<it.r+20){
+   if(it.bomb){endGame();return}
+   it.taken=true;score++;scoreEl.textContent=score;
+  }
+  ctx.beginPath();ctx.arc(it.x,it.y,it.r,0,Math.PI*2);
+  ctx.fillStyle=it.bomb?'#ff385b':'#ffcf24';ctx.fill();
+  ctx.strokeStyle=it.bomb?'#b50032':'#fff27b';ctx.lineWidth=4;ctx.stroke();
+  ctx.fillStyle='white';ctx.font='bold 17px Arial';ctx.textAlign='center';
+  ctx.fillText(it.bomb?'!':'$',it.x,it.y+6);
+ });
+ items=items.filter(it=>it.x>-40&&!it.taken);
+ drawPlayer();
+}
+function endGame(){
+ if(!running)return;
+ running=false;
+ if(score>best){
+  best=score;bestEl.textContent=best;
+  try{localStorage.setItem('coinrush_best',best)}catch(e){}
+ }
+ result.textContent='Skor: '+score+' | Rekor: '+best;
+ document.getElementById('start').textContent='TEKRAR OYNA';
+ overlay.style.display='flex';
+}
+function bind(id,down,up){
+ const b=document.getElementById(id);
+ b.addEventListener('pointerdown',e=>{e.preventDefault();down()});
+ ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>
+ b.addEventListener(ev,e=>{up()}));
+}
+bind('left',()=>left=true,()=>left=false);
+bind('right',()=>right=true,()=>right=false);
+bind('jump',()=>{if(running&&player.ground){player.vy=-13;player.ground=false}},()=>{});
+document.addEventListener('keydown',e=>{
+ if(['ArrowLeft','ArrowRight','ArrowUp',' '].includes(e.key))e.preventDefault();
+ if(e.key==='ArrowLeft'||e.key==='a')left=true;
+ if(e.key==='ArrowRight'||e.key==='d')right=true;
+ if((e.key==='ArrowUp'||e.key===' ')&&running&&player.ground){
+  player.vy=-13;player.ground=false;
+ }
+});
+document.addEventListener('keyup',e=>{
+ if(e.key==='ArrowLeft'||e.key==='a')left=false;
+ if(e.key==='ArrowRight'||e.key==='d')right=false;
+});
+document.getElementById('start').onclick=reset;
+requestAnimationFrame(loop);
+</script>
+</body>
+  </html>
+  
