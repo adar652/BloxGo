@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
@@ -27,8 +27,8 @@ h1{font-size:34px;margin:0 0 12px;color:#ffe84c}
 <canvas id="game"></canvas>
 
 <div id="hud">
-  <div class="panel">🪙 Skor: <span id="score">0</span></div>
-  <div class="panel">🏆 Rekor: <span id="best">0</span></div>
+  <div class="panel">🪙 Score: <span id="score">0</span></div>
+  <div class="panel">🏆 Best: <span id="best">0</span></div>
 </div>
 
 <button id="exitButton">⬅ Exit</button>
@@ -44,8 +44,10 @@ h1{font-size:34px;margin:0 0 12px;color:#ffe84c}
 <div id="overlay">
   <div class="box">
     <h1>JUMP MASTER</h1>
-    <p id="result:Highest Score 0</p>
+    <p>Collect coins and avoid bombs!</p>
+    <p id="result">Your best score: 0</p>
     <button id="start">PLAY!</button>
+    <p class="small">Move and jump to survive!</p>
   </div>
 </div>
 
@@ -73,7 +75,6 @@ function resize(){
 addEventListener('resize',resize);
 resize();
 
-/* İki klasör yukarıdaki index.html dosyasını aç */
 document.getElementById('exitButton').onclick=()=>{
   window.location.href='../../index.html';
 };
@@ -135,8 +136,8 @@ function endGame(){
     try{localStorage.setItem('jumpmaster_best',best)}catch(e){}
   }
 
-  result.textContent='Skor: '+score+' | Rekor: '+best;
-  document.getElementById('start').textContent='TEKRAR OYNA';
+  result.textContent='Score: '+score+' | Best: '+best;
+  document.getElementById('start').textContent='PLAY AGAIN';
   overlay.style.display='flex';
 }
 
