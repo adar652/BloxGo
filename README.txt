@@ -1,1 +1,2 @@
-BloxGo Revival\n\nOpen index.html in your HTML viewer. Both Robux and Tix images are embedded directly in the HTML, so local image paths are not required. Copies are included in Content/Icons/. Server cards are demo listings; real multiplayer requires a backend.\n
+BloxGo APK Is Not Released So Open adar652.github.io/BloxGo To Play BloxGo.
+But theres Only Jump Master For Now And It's A Test
