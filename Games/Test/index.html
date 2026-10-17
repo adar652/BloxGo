@@ -9,16 +9,16 @@
 *{box-sizing:border-box}
 body{margin:0;overflow:hidden;font-family:Arial,sans-serif;background:#1689f8;color:white;touch-action:none}
 canvas{display:block;width:100vw;height:100dvh}
-#hud{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;pointer-events:none}
+#hud{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
 .panel{background:#073775dd;padding:10px 14px;border-radius:15px;font-weight:bold;font-size:17px}
-#exitButton{position:absolute;top:75px;left:12px;padding:10px 15px;border:2px solid white;border-radius:12px;background:#073775;color:white;font-weight:bold;font-size:15px;z-index:5}
+#exitButton{position:absolute;top:70px;left:12px;padding:10px 15px;border:2px solid white;border-radius:12px;background:#073775;color:white;font-weight:bold;font-size:15px;z-index:5}
 #buttons{position:absolute;bottom:22px;left:0;right:0;display:flex;justify-content:space-between;padding:0 20px}
-button.control{border:2px solid #ffffffbb;background:#0754a9aa;color:white;border-radius:50%;width:65px;height:65px;font-size:27px;font-weight:bold;touch-action:none}
+.control{border:2px solid #ffffffbb;background:#0754a9aa;color:white;border-radius:50%;width:65px;height:65px;font-size:27px;font-weight:bold;touch-action:none}
 #jump{width:85px;height:85px;font-size:35px}
 #overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#001c4a99}
-.box{text-align:center;background:#083b78;padding:26px;border:2px solid #70d9ff;border-radius:24px;width:min(85%,340px);box-shadow:0 10px 40px #001b48}
+.box{text-align:center;background:#083b78;padding:26px;border:2px solid #70d9ff;border-radius:24px;width:min(85%,340px)}
 h1{font-size:34px;margin:0 0 12px;color:#ffe84c}
-#start{width:auto;height:auto;border-radius:14px;padding:15px 28px;background:#15b8ff;color:white;border:0;font-size:20px;font-weight:bold}
+#start{border:0;border-radius:14px;padding:15px 28px;background:#15b8ff;color:white;font-size:20px;font-weight:bold}
 .small{opacity:.8;font-size:14px}
 </style>
 </head>
@@ -31,7 +31,7 @@ h1{font-size:34px;margin:0 0 12px;color:#ffe84c}
   <div class="panel">🏆 Rekor: <span id="best">0</span></div>
 </div>
 
-<button id="exitButton">⬅ Çık</button>
+<button id="exitButton">⬅ Exit</button>
 
 <div id="buttons">
   <div>
@@ -44,10 +44,8 @@ h1{font-size:34px;margin:0 0 12px;color:#ffe84c}
 <div id="overlay">
   <div class="box">
     <h1>JUMP MASTER</h1>
-    <p>Altınları topla, bombalardan kaç!</p>
-    <p id="result">En yüksek skor: 0</p>
-    <button id="start">OYNA!</button>
-    <p class="small">Hareket et ve zıpla!</p>
+    <p id="result:Highest Score 0</p>
+    <button id="start">PLAY!</button>
   </div>
 </div>
 
@@ -67,7 +65,7 @@ try{best=Number(localStorage.getItem('jumpmaster_best'))||0}catch(e){}
 bestEl.textContent=best;
 
 function resize(){
-  scale=window.devicePixelRatio||1;
+  scale=devicePixelRatio||1;
   W=innerWidth;H=innerHeight;
   c.width=W*scale;c.height=H*scale;
   ctx.setTransform(scale,0,0,scale,0,0);
@@ -75,8 +73,9 @@ function resize(){
 addEventListener('resize',resize);
 resize();
 
+/* İki klasör yukarıdaki index.html dosyasını aç */
 document.getElementById('exitButton').onclick=()=>{
-  window.location.href='../Menu.html';
+  window.location.href='../../index.html';
 };
 
 function reset(){
@@ -89,13 +88,7 @@ function reset(){
 
 function spawn(){
   const bomb=Math.random()<.25;
-  items.push({
-    x:W+30,
-    y:H*.57+Math.random()*H*.17,
-    r:bomb?17:13,
-    bomb,
-    taken:false
-  });
+  items.push({x:W+30,y:H*.57+Math.random()*H*.17,r:bomb?17:13,bomb,taken:false});
 }
 
 function drawBackground(){
@@ -106,7 +99,7 @@ function drawBackground(){
   ctx.fillRect(0,0,W,H);
 
   for(let i=0;i<8;i++){
-    let x=(i*125-frame*.25)%(W+140);
+    let x=((i*125-frame*.25)%(W+140)+W+140)%(W+140);
     ctx.fillStyle='#ffffff30';
     ctx.beginPath();
     ctx.arc(x,H*.22+i%3*35,25,0,7);
@@ -151,12 +144,11 @@ function loop(t){
   requestAnimationFrame(loop);
   const dt=Math.min((t-(last||t))/16.67,2);
   last=t;
-
   drawBackground();
+
   if(!running)return;
 
   frame+=dt;
-
   if(frame>48){
     spawn();
     frame=0;
@@ -176,15 +168,15 @@ function loop(t){
   if(right)player.x+=4*dt;
   player.x=Math.max(0,Math.min(W-player.w,player.x));
 
-  items.forEach(it=>{
+  for(const it of items){
     it.x-=speed*dt;
 
     if(!it.taken&&
-      Math.abs(it.x-player.x-player.w/2)<it.r+17&&
-      Math.abs(it.y-player.y-player.h/2)<it.r+20){
+       Math.abs(it.x-player.x-player.w/2)<it.r+17&&
+       Math.abs(it.y-player.y-player.h/2)<it.r+20){
       if(it.bomb){
         endGame();
-        return;
+        break;
       }
       it.taken=true;
       score++;
@@ -202,7 +194,7 @@ function loop(t){
     ctx.font='bold 17px Arial';
     ctx.textAlign='center';
     ctx.fillText(it.bomb?'!':'$',it.x,it.y+6);
-  });
+  }
 
   items=items.filter(it=>it.x>-40&&!it.taken);
   drawPlayer();
@@ -229,12 +221,9 @@ bind('jump',()=>{
 },()=>{});
 
 document.addEventListener('keydown',e=>{
-  if(['ArrowLeft','ArrowRight','ArrowUp',' '].includes(e.key))
-    e.preventDefault();
-
+  if(['ArrowLeft','ArrowRight','ArrowUp',' '].includes(e.key))e.preventDefault();
   if(e.key==='ArrowLeft'||e.key==='a')left=true;
   if(e.key==='ArrowRight'||e.key==='d')right=true;
-
   if((e.key==='ArrowUp'||e.key===' ')&&running&&player.ground){
     player.vy=-13;
     player.ground=false;
