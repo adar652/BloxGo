@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>BloxGo</title>
+<style>
+:root{color-scheme:dark;--bg:#101827;--panel:#19263a;--hover:#223550;--blue:#1685ff;--text:#f4f7ff;--muted:#a9b8ce;--border:#2a3b54}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 18px;background:var(--panel);border-bottom:1px solid var(--border)}
+.brand{font-size:25px;font-weight:800;color:#62aaff}.navigation,.balances,.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nav-button,.action-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 13px;border:1px solid var(--border);border-radius:9px;background:var(--hover);color:var(--text)}
+.nav-button:hover,.action-button:hover{background:#304766}.nav-icon{width:24px;height:24px;object-fit:contain;flex-shrink:0}
+.balance{display:flex;align-items:center;gap:6px;padding:7px 10px;background:#101827;border:1px solid var(--border);border-radius:9px;font-weight:700}
+.currency-icon{width:22px;height:22px;object-fit:contain}.primary{background:var(--blue);border-color:var(--blue)}main{width:min(1100px,100%);margin:auto;padding:24px 18px}
+h1{margin-top:0}.muted,.status{color:var(--muted)}.toolbar{margin:18px 0}.search,input,select{padding:11px;color:var(--text);background:var(--panel);border:1px solid var(--border);border-radius:9px;min-width:0}.search{flex:1;min-width:180px}
+.section{margin-top:26px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}.card{overflow:hidden;border:1px solid var(--border);border-radius:12px;background:var(--panel)}.card-body{padding:14px}.card h3{margin:0 0 9px}.card p{color:var(--muted);font-size:14px;min-height:34px}.thumb{display:flex;align-items:center;justify-content:center;width:100%;height:120px;background:linear-gradient(135deg,#1b3e67,#152239);font-size:44px}.card .action-button{width:100%}.price{display:flex;align-items:center;gap:6px;font-weight:bold;margin:12px 0}.empty{padding:24px;border:1px dashed var(--border);border-radius:12px;color:var(--muted);text-align:center}
+[hidden]{display:none!important}footer{text-align:center;padding:24px;color:var(--muted)}.notice{padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--muted)}.task{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px;background:var(--panel);border:1px solid var(--border);border-radius:10px;margin:10px 0}
+@media(max-width:600px){.topbar{align-items:flex-start}.navigation{width:100%}.nav-button{flex:1;padding:9px 8px}.brand{margin:4px 0}.balances{width:100%}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">BloxGo</div>
+  <nav class="navigation" aria-label="Main navigation">
+    <button class="nav-button" data-page="games"><img class="nav-icon" src="Content/Icons/games_icon.png" alt="">Games</button>
+    <button class="nav-button" data-page="servers"><img class="nav-icon" src="Content/Icons/servers_icon.png" alt="">Servers</button>
+    <button class="nav-button" data-page="catalog">Catalog</button>
+    <button class="nav-button" data-page="passes">Game Passes</button>
+    <button class="nav-button" data-page="earn">Earn</button>
+    <button class="nav-button" data-page="exchange">Exchange</button>
+    <button class="nav-button" id="refreshButton"><img class="nav-icon" src="Content/Icons/refresh_icon.png" alt="">Refresh</button>
+  </nav>
+  <div class="balances" aria-label="Demo balances">
+    <div class="balance"><img class="currency-icon" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHBhdGggZmlsbD0iI2YzYzM1ZCIgZD0iTTMyIDRMMzggMTlsMTYgMkw0MiAzM2wzIDE3LTIwLTEwLTExIDEwIDQtMTctMTItMTJsMTctMloiLz48cGF0aCBmaWxsPSIjZmZmMGJmIiBkPSJNMzIgMTBsNCAxMCAxMSAxTDM4IDMybDIgMTItOC01LTkgNSAzLTEyLTktMTAgMTItMkwzMiAxMFoiLz48L3N2Zz4=" alt="Robux"><span id="robuxBalance">100</span></div>
+    <div class="balance"><img class="currency-icon" src="Content/Icons/Tix.png" alt="Tix"><span id="tixBalance">50</span></div>
+  </div>
+</header>
+<main>
+<section id="page-games" class="page">
+  <h1>Games</h1><p class="muted">Discover and play games on BloxGo.</p>
+  <div class="toolbar"><input class="search" id="searchGames" type="search" placeholder="Search games..." aria-label="Search games"><button class="action-button primary" id="reloadGames"><img class="nav-icon" src="Content/Icons/refresh_icon.png" alt="">Refresh Games</button></div>
+  <p class="status" id="gamesStatus" role="status">Loading Games...</p><div id="gamesGrid" class="grid"></div>
+</section>
+<section id="page-servers" class="page" hidden>
+  <h1>Servers</h1><p class="muted">Enter a supported game server address.</p>
+  <div class="toolbar"><input class="search" id="serverAddress" placeholder="Server address..." aria-label="Server address"><button class="action-button primary" id="connectServer">Connect</button></div>
+  <p class="status" id="serverStatus">A compatible connection service is required to join servers.</p>
+</section>
+<section id="page-catalog" class="page" hidden>
+  <h1>Catalog</h1><p class="muted">Browse avatar items. Purchases in this prototype are simulated.</p>
+  <div class="toolbar"><input class="search" id="catalogSearch" placeholder="Search catalog..." aria-label="Search catalog"></div>
+  <div class="grid" id="catalogGrid"></div>
+</section>
+<section id="page-passes" class="page" hidden>
+  <h1>Game Passes</h1><p class="muted">Browse passes configured for BloxGo games.</p>
+  <div class="notice">Demo listing: connect a verified backend to load real pass information and confirm purchases.</div>
+  <div class="grid section" id="passesGrid"></div>
+</section>
+<section id="page-earn" class="page" hidden>
+  <h1>Earn Rewards</h1><p class="muted">Complete demo tasks to earn BloxGo currency. Rewards are stored only in this browser.</p>
+  <div class="notice">These are demo rewards, not official Roblox currency. Do not pay or share your password to claim them.</div>
+  <div id="tasks"></div>
+</section>
+<section id="page-exchange" class="page" hidden>
+  <h1>Currency Exchange</h1><p class="muted">Exchange 10 Tix for 5 Robux (demo balance).</p>
+  <div class="card"><div class="card-body">
+    <div class="price"><img class="currency-icon" src="Content/Icons/Tix.png" alt="Tix">10 Tix <span>→</span><img class="currency-icon" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHBhdGggZmlsbD0iI2YzYzM1ZCIgZD0iTTMyIDRMMzggMTlsMTYgMkw0MiAzM2wzIDE3LTIwLTEwLTExIDEwIDQtMTctMTItMTJsMTctMloiLz48L3N2Zz4=" alt="Robux">5 Robux</div>
+    <button class="action-button primary" id="exchangeButton">Exchange 10 Tix</button><p class="status" id="exchangeStatus" role="status"></p>
+  </div></div>
+</section>
+</main>
+<footer>BloxGo — Community gaming platform</footer>
+<script>
+"use strict";
+/* Prototype only: browser-stored demo balances are not secure real accounts. */
+const $=id=>document.getElementById(id);
+const ROBUX_ICON='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHBhdGggZmlsbD0iI2YzYzM1ZCIgZD0iTTMyIDRMMzggMTlsMTYgMkw0MiAzM2wzIDE3LTIwLTEwLTExIDEwIDQtMTctMTItMTJsMTctMloiLz48L3N2Zz4=';
+const items=[
+ {name:"Epic Face",price:79,currency:"Robux",symbol:"😎",type:"Avatar item"},
+ {name:"Blue Headphones",price:25,currency:"Robux",symbol:"🎧",type:"Avatar item"},
+ {name:"Classic Cap",price:15,currency:"Robux",symbol:"🧢",type:"Avatar item"},
+ {name:"Golden Crown",price:100,currency:"Tix",symbol:"👑",type:"Avatar item"}
+];
+const passes=[
+ {name:"VIP Pass",price:50,description:"A demo VIP game pass."},
+ {name:"Double Rewards",price:35,description:"A demo double-rewards game pass."},
+ {name:"Extra Inventory",price:20,description:"A demo inventory upgrade pass."}
+];
+function readNumber(key,fallback){const v=Number(localStorage.getItem(key));return Number.isFinite(v)&&v>=0?v:fallback}
+let robux=readNumber("bloxgo_demo_robux",100),tix=readNumber("bloxgo_demo_tix",50);
+function saveBalances(){localStorage.setItem("bloxgo_demo_robux",String(robux));localStorage.setItem("bloxgo_demo_tix",String(tix));renderBalances()}
+function renderBalances(){$("robuxBalance").textContent=robux;$("tixBalance").textContent=tix}
+function currencyIcon(currency){const img=document.createElement("img");img.className="currency-icon";img.alt=currency;img.src=currency==="Tix"?"Content/Icons/Tix.png":ROBUX_ICON;return img}
+function showPage(name){document.querySelectorAll(".page").forEach(p=>p.hidden=p.id!=="page-"+name)}
+document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+function buyItem(item){
+ const owned=JSON.parse(localStorage.getItem("bloxgo_demo_owned")||"[]");
+ if(owned.includes(item.name)){alert("You already own this demo item.");return}
+ const balance=item.currency==="Tix"?tix:robux;
+ if(balance<item.price){alert("Not enough "+item.currency+".");return}
+ if(item.currency==="Tix")tix-=item.price;else robux-=item.price;
+ owned.push(item.name);localStorage.setItem("bloxgo_demo_owned",JSON.stringify(owned));saveBalances();renderCatalog();
+ alert(item.name+" added to your demo inventory!");
+}
+function makeCard(name,description,symbol,price,currency,actionLabel,action){
+ const card=document.createElement("article");card.className="card";
+ const thumb=document.createElement("div");thumb.className="thumb";thumb.textContent=symbol;
+ const body=document.createElement("div");body.className="card-body";
+ const h=document.createElement("h3");h.textContent=name;
+ const p=document.createElement("p");p.textContent=description;
+ const priceLine=document.createElement("div");priceLine.className="price";priceLine.append(currencyIcon(currency));priceLine.append(document.createTextNode(String(price)+" "+currency));
+ const btn=document.createElement("button");btn.className="action-button primary";btn.textContent=actionLabel;btn.addEventListener("click",action);
+ body.append(h,p,priceLine,btn);card.append(thumb,body);return card;
+}
+function renderCatalog(){
+ const q=$("catalogSearch").value.trim().toLowerCase(),owned=JSON.parse(localStorage.getItem("bloxgo_demo_owned")||"[]");
+ $("catalogGrid").replaceChildren();
+ items.filter(x=>x.name.toLowerCase().includes(q)).forEach(item=>{
+  const already=owned.includes(item.name);
+  $("catalogGrid").append(makeCard(item.name,item.type,item.symbol,item.price,item.currency,already?"Owned":"Buy",()=>{if(!already)buyItem(item);}));
+ });
+ if(!$("catalogGrid").children.length){const e=document.createElement("div");e.className="empty";e.textContent="No catalog items found."; $("catalogGrid").append(e)}
+}
+function renderPasses(){
+ $("passesGrid").replaceChildren();
+ passes.forEach(pass=>$("passesGrid").append(makeCard(pass.name,pass.description,"🎟️",pass.price,"Robux","Buy Pass",()=>{
+  if(robux<pass.price){alert("Not enough Robux.");return}
+  alert("This is a demo pass. Real purchases require a verified backend and platform integration.");
+ })));
+}
+const tasks=[
+ {id:"daily",name:"Daily check-in",desc:"Claim a one-time demo reward.",r:5,t:10},
+ {id:"explore",name:"Explore the Catalog",desc:"Visit the Catalog and claim this demo reward.",r:0,t:15},
+ {id:"games",name:"Browse Games",desc:"Browse the Games section and claim this demo reward.",r:3,t:5}
+];
+function renderTasks(){
+ const claimed=JSON.parse(localStorage.getItem("bloxgo_demo_claimed")||"[]");$("tasks").replaceChildren();
+ tasks.forEach(task=>{
+  const row=document.createElement("div");row.className="task";const info=document.createElement("div");
+  const title=document.createElement("strong");title.textContent=task.name;
+  const desc=document.createElement("div");desc.className="muted";desc.textContent=task.desc+" Reward: "+task.r+" Robux, "+task.t+" Tix.";
+  info.append(title,desc);const btn=document.createElement("button");btn.className="action-button";btn.textContent=claimed.includes(task.id)?"Claimed":"Claim Reward";btn.disabled=claimed.includes(task.id);
+  btn.addEventListener("click",()=>{if(claimed.includes(task.id))return;robux+=task.r;tix+=task.t;claimed.push(task.id);localStorage.setItem("bloxgo_demo_claimed",JSON.stringify(claimed));saveBalances();renderTasks()});
+  row.append(info,btn);$("tasks").append(row);
+ });
+}
+$("exchangeButton").addEventListener("click",()=>{
+ if(tix<10){$("exchangeStatus").textContent="You need at least 10 Tix.";return}
+ tix-=10;robux+=5;saveBalances();$("exchangeStatus").textContent="Exchanged 10 Tix for 5 demo Robux.";});
+$("catalogSearch").addEventListener("input",renderCatalog);
+async function loadGames(){
+ $("gamesStatus").textContent="Loading Games...";$("gamesGrid").replaceChildren();
+ try{
+  const res=await fetch("games.json",{cache:"no-store"});if(!res.ok)throw Error("HTTP "+res.status);
+  const data=await res.json();if(!Array.isArray(data))throw Error("games.json must be an array");
+  const q=$("searchGames").value.trim().toLowerCase();
+  const filtered=data.filter(g=>String(g.name||"").toLowerCase().includes(q));
+  if(!filtered.length){const e=document.createElement("div");e.className="empty";e.textContent=data.length?"No games match your search.":"No games found."; $("gamesGrid").append(e)}
+  filtered.forEach(game=>{
+   const folder=String(game.folder||game.name||"");
+   const path="Games/"+folder.split("/").map(encodeURIComponent).join("/")+"/";
+   const card=document.createElement("article");card.className="card";
+   const thumb=document.createElement("img");thumb.className="thumb";thumb.style.objectFit="cover";thumb.alt="";thumb.src=game.thumbnail||path+"thumbnail.png";thumb.onerror=()=>{thumb.replaceWith(Object.assign(document.createElement("div"),{className:"thumb",textContent:"🎮"}))};
+   const body=document.createElement("div");body.className="card-body";const h=document.createElement("h3");h.textContent=game.name||"Untitled Game";
+   const a=document.createElement("a");a.className="action-button primary";a.style.textDecoration="none";a.textContent="Play";a.href=game.url||path+"index.html";
+   body.append(h,a);card.append(thumb,body);$("gamesGrid").append(card);
+  });
+  $("gamesStatus").textContent=data.length+" game(s) loaded.";
+ }catch(err){$("gamesStatus").textContent="Could not load games.json. Check the file path and GitHub Pages settings.";const e=document.createElement("div");e.className="empty";e.textContent="Games could not be loaded. Other BloxGo sections are still available."; $("gamesGrid").append(e);console.error(err)}
+}
+$("searchGames").addEventListener("input",loadGames);$("refreshButton").addEventListener("click",loadGames);$("reloadGames").addEventListener("click",loadGames);
+$("connectServer").addEventListener("click",()=>{const address=$("serverAddress").value.trim();$("serverStatus").textContent=address?"Address entered: "+address+". A compatible connection service is required to join.":"Please enter a server address."});
+renderBalances();renderCatalog();renderPasses();renderTasks();loadGames();
+</script>
+</body>
+</html>
