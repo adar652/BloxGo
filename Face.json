@@ -1,0 +1,11 @@
+{
+  "faces": [
+    {
+      "id": "smile",
+      "name": "Smile",
+      "type": "face",
+      "image": "Content/Faces/smile.png",
+      "price": 0
+    }
+  ]
+}
