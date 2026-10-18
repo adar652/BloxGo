@@ -1,239 +1,432 @@
 
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BloxGo</title>
-<style>
-:root{--bg:#101522;--panel:#1a2233;--panel2:#222d42;--blue:#087cff;--text:#f4f7ff;--muted:#aab6ca;--border:#303c52}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;background:#151d2c;border-bottom:1px solid var(--border);flex-wrap:wrap}
-.brand{font-size:27px;font-weight:900;color:#1684ff}
-.currencies{display:flex;gap:9px}
-.currency{display:flex;align-items:center;gap:6px;background:var(--panel2);padding:8px 11px;border-radius:10px}
-.currency img{width:23px;height:23px;object-fit:contain}
-nav{display:flex;gap:8px;padding:12px 18px;background:#151d2c;flex-wrap:wrap}
-button{border:0;border-radius:9px;padding:11px 16px;background:var(--panel2);color:white;font-weight:bold;cursor:pointer}
-button.active,.primary{background:var(--blue)}
-main{padding:18px}
-.search,.field{width:100%;padding:13px 15px;border-radius:10px;border:1px solid var(--border);background:var(--panel);color:white;font-size:16px;margin-bottom:12px}
-.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
-.game-card{overflow:hidden;background:var(--panel);border:1px solid var(--border);border-radius:13px}
-.thumbnail{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#26334a}
-.game-info{padding:13px}
-.game-title{display:flex;align-items:center;gap:9px;font-weight:bold;margin-bottom:12px}
-.game-logo{width:36px;height:36px;object-fit:cover;border-radius:8px;background:#26334a}
-.action{width:100%}
-.status{padding:20px;border-radius:10px;background:var(--panel);color:var(--muted);text-align:center;grid-column:1/-1}
-.server-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:15px;margin:12px 0;overflow-wrap:anywhere}
-.hidden{display:none!important}
-.muted{color:var(--muted);font-size:13px}
-</style>
-</head>
-<body>
-<header>
-  <div class="brand">BloxGo</div>
-  <div class="currencies">
-    <div class="currency"><img src="./Content/Icons/Robux_Icon.png" alt="Robux"><span id="robux">0</span></div>
-    <div class="currency"><img src="./Content/Icons/Tix.png" alt="Tix"><span id="tix">0</span></div>
-  </div>
-</header>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101827">
+  <title>BloxGo</title>
 
-<nav>
-  <button id="gamesTab" class="active" onclick="showTab('games')">Games</button>
-  <button id="serversTab" onclick="showTab('servers')">Servers</button>
-  <button onclick="loadGames()">Refresh</button>
-</nav>
-
-<main>
-<section id="gamesSection">
-  <input id="search" class="search" placeholder="Search games..." oninput="renderGames()">
-  <h2>Discover</h2>
-  <div id="gamesList" class="games-grid">
-    <div class="status">Loading Games...</div>
-  </div>
-</section>
-
-<section id="serversSection" class="hidden">
-  <h2>Servers</h2>
-  <input id="serverName" class="field" placeholder="Server name">
-  <input id="serverAddress" class="field" placeholder="Server address">
-  <button class="primary" onclick="addServer()">Add Server</button>
-  <p class="muted">Sunucular bu oturum boyunca listede tutulur.</p>
-  <div id="serversList"></div>
-</section>
-</main>
-
-<script>
-const $ = id => document.getElementById(id);
-let games = [];
-let servers = [];
-
-/* Local HTML viewers may block fetch(). This list is the fallback.
-   Change these names to match the folders inside Games/. */
-const fallbackGames = [
-  {name:"Natural Disaster",folder:"Natural Disaster"},
-  {name:"Parkour",folder:"Parkour"}
-];
-
-function showTab(tab){
-  $("gamesSection").classList.toggle("hidden",tab!=="games");
-  $("serversSection").classList.toggle("hidden",tab!=="servers");
-  $("gamesTab").classList.toggle("active",tab==="games");
-  $("serversTab").classList.toggle("active",tab==="servers");
-}
-
-function gamePath(game){
-  // Encode each folder segment separately so spaces work.
-  const folder = String(game.folder || game.name);
-  return "./Games/" + folder.split("/").map(encodeURIComponent).join("/") + "/";
-}
-
-function makeStatus(message){
-  const div=document.createElement("div");
-  div.className="status";
-  div.textContent=message;
-  return div;
-}
-
-function renderGames(){
-  const list=$("gamesList");
-  const query=$("search").value.trim().toLowerCase();
-  const filtered=games.filter(g=>String(g.name).toLowerCase().includes(query));
-  list.replaceChildren();
-
-  if(!filtered.length){
-    list.appendChild(makeStatus(games.length?"No games found.":"No games available."));
-    return;
-  }
-
-  filtered.forEach(game=>{
-    const base=gamePath(game);
-    const card=document.createElement("article");
-    card.className="game-card";
-
-    const thumbnail=document.createElement("img");
-    thumbnail.className="thumbnail";
-    thumbnail.src=base+"thumbnail.png";
-    thumbnail.alt=game.name+" thumbnail";
-    thumbnail.onerror=()=>{thumbnail.style.visibility="hidden";};
-
-    const info=document.createElement("div");
-    info.className="game-info";
-
-    const title=document.createElement("div");
-    title.className="game-title";
-
-    const logo=document.createElement("img");
-    logo.className="game-logo";
-    logo.src=base+"logo.png";
-    logo.alt="";
-    logo.onerror=()=>{logo.style.display="none";};
-
-    const name=document.createElement("span");
-    name.textContent=game.name;
-    title.append(logo,name);
-
-    const play=document.createElement("button");
-    play.className="action primary";
-    play.textContent="Play";
-    play.onclick=()=>{
-      // Open the actual game page in its own folder.
-      window.location.href=base+"index.html";
-    };
-
-    info.append(title,play);
-    card.append(thumbnail,info);
-    list.appendChild(card);
-  });
-}
-
-async function loadGames(){
-  const list=$("gamesList");
-  list.replaceChildren(makeStatus("Loading Games..."));
-
-  try{
-    const response=await fetch("./games.json",{cache:"no-store"});
-    if(!response.ok) throw new Error("games.json HTTP "+response.status);
-
-    const data=await response.json();
-    if(!Array.isArray(data)) throw new Error("games.json must be an array");
-
-    games=data.filter(g=>g && typeof g.name==="string" && g.name.trim());
-    renderGames();
-  }catch(error){
-    console.warn("Could not load games.json:",error);
-
-    // Useful when fetch is blocked by a local HTML viewer.
-    games=fallbackGames.slice();
-    renderGames();
-
-    if(!games.length){
-      list.replaceChildren(makeStatus(
-        "Games could not load. Check games.json or use a web server."
-      ));
+  <style>
+    :root {
+      color-scheme: dark;
+      --background: #101827;
+      --panel: #19263a;
+      --panel-hover: #223550;
+      --blue: #1685ff;
+      --text: #f4f7ff;
+      --muted: #a9b8ce;
+      --border: #2a3b54;
     }
-  }
-}
 
-function addServer(){
-  const name=$("serverName").value.trim();
-  const address=$("serverAddress").value.trim();
-  if(!name||!address){alert("Enter the server name and address.");return;}
+    * {
+      box-sizing: border-box;
+    }
 
-  servers.push({name,address});
-  $("serverName").value="";
-  $("serverAddress").value="";
-  renderServers();
-}
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+    }
 
-function renderServers(){
-  const list=$("serversList");
-  list.replaceChildren();
+    button, input {
+      font: inherit;
+    }
 
-  if(!servers.length){
-    list.appendChild(makeStatus("No servers added yet."));
-    return;
-  }
+    button {
+      cursor: pointer;
+    }
 
-  servers.forEach((server,index)=>{
-    const card=document.createElement("div");
-    card.className="server-card";
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 16px 20px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+    }
 
-    const heading=document.createElement("h3");
-    heading.textContent=server.name;
+    .brand {
+      font-size: 25px;
+      font-weight: 800;
+      color: #62aaff;
+    }
 
-    const addr=document.createElement("p");
-    addr.textContent=server.address;
+    .navigation {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
 
-    const connect=document.createElement("button");
-    connect.className="action primary";
-    connect.textContent="Connect";
-    connect.onclick=()=>{
-      if(/^https?:\/\//i.test(server.address)){
-        window.open(server.address,"_blank","noopener");
-      }else{
-        alert("Bu adres için otomatik bağlantı desteği sunucu türüne ve oyuna bağlıdır.");
+    .nav-button, .action-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--panel-hover);
+      color: var(--text);
+    }
+
+    .nav-button:hover, .action-button:hover {
+      background: #304766;
+    }
+
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    main {
+      width: min(1100px, 100%);
+      margin: auto;
+      padding: 24px 18px;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 18px 0;
+    }
+
+    .search {
+      flex: 1;
+      min-width: 180px;
+      padding: 12px;
+      color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+    }
+
+    .primary {
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .primary:hover {
+      background: #0871e5;
+    }
+
+    .status {
+      color: var(--muted);
+      margin: 18px 0;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 16px;
+    }
+
+    .game-card {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--panel);
+    }
+
+    .game-card img.thumbnail {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: #223550;
+    }
+
+    .game-info {
+      padding: 14px;
+    }
+
+    .game-info h3 {
+      margin: 0 0 12px;
+    }
+
+    .game-info a {
+      color: white;
+      text-decoration: none;
+    }
+
+    .game-info .action-button {
+      width: 100%;
+    }
+
+    .empty {
+      padding: 24px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .section {
+      margin-top: 28px;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    footer {
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">BloxGo</div>
+
+    <nav class="navigation" aria-label="Main navigation">
+      <button class="nav-button" id="gamesButton">
+        <img class="nav-icon"
+             src="Content/Icons/games_icon.png"
+             alt="">
+        Games
+      </button>
+
+      <button class="nav-button" id="serversButton">
+        <img class="nav-icon"
+             src="Content/Icons/servers_icon.png"
+             alt="">
+        Servers
+      </button>
+
+      <button class="nav-button" id="refreshButton">
+        <img class="nav-icon"
+             src="Content/Icons/refresh_icon.png"
+             alt="">
+        Refresh
+      </button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="gamesSection">
+      <h1>Games</h1>
+      <p>Discover and play games on BloxGo.</p>
+
+      <div class="toolbar">
+        <input
+          class="search"
+          id="searchInput"
+          type="search"
+          placeholder="Search games..."
+          aria-label="Search games">
+
+        <button class="action-button primary" id="reloadGames">
+          <img class="nav-icon"
+               src="Content/Icons/refresh_icon.png"
+               alt="">
+          Refresh Games
+        </button>
+      </div>
+
+      <p class="status" id="gamesStatus" role="status">
+        Loading Games...
+      </p>
+
+      <div class="games-grid" id="gamesGrid"></div>
+    </section>
+
+    <section class="section" id="serversSection" hidden>
+      <h1>Servers</h1>
+      <p>Connect to a supported game server.</p>
+
+      <div class="toolbar">
+        <input
+          class="search"
+          id="serverAddress"
+          type="text"
+          placeholder="Enter server address..."
+          aria-label="Server address">
+
+        <button class="action-button primary" id="connectServer">
+          Connect
+        </button>
+      </div>
+
+      <p class="status" id="serverStatus" role="status">
+        Enter a server address to continue.
+      </p>
+
+      <p>
+        Note: This is a server-address interface. Actual connections
+        require a compatible game client or server API.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    BloxGo — A community gaming platform
+  </footer>
+
+  <script>
+    "use strict";
+
+    const gamesGrid = document.getElementById("gamesGrid");
+    const gamesStatus = document.getElementById("gamesStatus");
+    const searchInput = document.getElementById("searchInput");
+
+    const gamesSection = document.getElementById("gamesSection");
+    const serversSection = document.getElementById("serversSection");
+
+    let allGames = [];
+
+    function showSection(section) {
+      gamesSection.hidden = section !== "games";
+      serversSection.hidden = section !== "servers";
+    }
+
+    document.getElementById("gamesButton").addEventListener("click", () => {
+      showSection("games");
+    });
+
+    document.getElementById("serversButton").addEventListener("click", () => {
+      showSection("servers");
+    });
+
+    function createGameCard(game) {
+      const card = document.createElement("article");
+      card.className = "game-card";
+
+      const thumbnail = document.createElement("img");
+      thumbnail.className = "thumbnail";
+      thumbnail.alt = "";
+      thumbnail.loading = "lazy";
+
+      const folder = String(game.folder || game.name || "");
+      const thumbnailPath = game.thumbnail || "thumbnail.png";
+
+      thumbnail.src = game.thumbnail
+        ? thumbnailPath
+        : "Games/" + encodeURIComponent(folder).replace(/%2F/gi, "/")
+          + "/" + thumbnailPath;
+
+      thumbnail.addEventListener("error", () => {
+        thumbnail.hidden = true;
+      }, { once: true });
+
+      const info = document.createElement("div");
+      info.className = "game-info";
+
+      const title = document.createElement("h3");
+      title.textContent = game.name || "Untitled Game";
+
+      const play = document.createElement("a");
+      play.className = "action-button primary";
+      play.textContent = "Play";
+
+      if (game.url) {
+        play.href = game.url;
+      } else {
+        play.href = "Games/"
+          + encodeURIComponent(folder).replace(/%2F/gi, "/")
+          + "/index.html";
       }
-    };
 
-    const remove=document.createElement("button");
-    remove.textContent="Remove";
-    remove.style.marginTop="8px";
-    remove.onclick=()=>{
-      servers.splice(index,1);
-      renderServers();
-    };
+      info.append(title, play);
+      card.append(thumbnail, info);
 
-    card.append(heading,addr,connect,remove);
-    list.appendChild(card);
-  });
-}
+      return card;
+    }
 
-renderServers();
-loadGames();
-</script>
+    function renderGames() {
+      const query = searchInput.value.trim().toLowerCase();
+
+      const filteredGames = allGames.filter(game =>
+        String(game.name || "").toLowerCase().includes(query)
+      );
+
+      gamesGrid.replaceChildren();
+
+      if (filteredGames.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = allGames.length
+          ? "No games match your search."
+          : "No games found. Check games.json.";
+        gamesGrid.append(empty);
+        return;
+      }
+
+      filteredGames.forEach(game => {
+        gamesGrid.append(createGameCard(game));
+      });
+    }
+
+    async function loadGames() {
+      gamesStatus.textContent = "Loading Games...";
+      gamesGrid.replaceChildren();
+
+      try {
+        const response = await fetch("games.json", {
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          throw new Error("Could not load games.json (" + response.status + ")");
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("games.json must contain a JSON array.");
+        }
+
+        allGames = data;
+        renderGames();
+
+        gamesStatus.textContent = allGames.length
+          ? allGames.length + " game(s) available."
+          : "No games found.";
+      } catch (error) {
+        allGames = [];
+        renderGames();
+        gamesStatus.textContent =
+          "Could not load games. Check your GitHub Pages URL and games.json.";
+        console.error("BloxGo games loading error:", error);
+      }
+    }
+
+    searchInput.addEventListener("input", renderGames);
+
+    document.getElementById("refreshButton")
+      .addEventListener("click", loadGames);
+
+    document.getElementById("reloadGames")
+      .addEventListener("click", loadGames);
+
+    document.getElementById("connectServer").addEventListener("click", () => {
+      const address = document.getElementById("serverAddress").value.trim();
+      const status = document.getElementById("serverStatus");
+
+      if (!address) {
+        status.textContent = "Please enter a server address.";
+        return;
+      }
+
+      status.textContent =
+        "Server address saved for this session: " + address
+        + ". A compatible connection service is required to join.";
+    });
+
+    loadGames();
+  </script>
 </body>
 </html>
