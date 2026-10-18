@@ -3,47 +3,55 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
 <title>BloxGo</title>
 <style>
 :root{color-scheme:dark;--bg:#101827;--panel:#19263a;--border:#2a3b54;--blue:#1685ff;--text:#f4f7ff;--muted:#a9b8ce}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
 button,input{font:inherit}
-button{cursor:pointer}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:15px 18px;background:var(--panel);border-bottom:1px solid var(--border)}
-.brand{font-size:25px;font-weight:bold;color:#62aaff}
-nav,.balances,.actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+button,a{cursor:pointer}
 button{background:#223550;color:white;border:1px solid var(--border);border-radius:9px;padding:10px 13px}
 button:hover{background:#304766}
 .primary{background:var(--blue);border-color:var(--blue)}
-.icon{width:23px;height:23px;object-fit:contain;vertical-align:middle}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:15px 18px;background:var(--panel);border-bottom:1px solid var(--border)}
+.brand{font-size:26px;font-weight:bold;color:#62aaff}
+nav,.balances{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .navbtn{display:inline-flex;align-items:center;gap:7px}
-.balance{display:flex;align-items:center;gap:6px;padding:8px 10px;background:#101827;border:1px solid var(--border);border-radius:9px}
-main{max-width:1050px;margin:auto;padding:22px 16px}
-section{margin-bottom:28px}
+.icon{width:23px;height:23px;object-fit:contain;vertical-align:middle}
+.balance{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:8px 10px}
+main{max-width:1100px;margin:auto;padding:22px 16px}
+section{margin-bottom:30px}
 h1{font-size:27px}
-h2{font-size:21px}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-.item-image{width:100%;max-width:220px;aspect-ratio:1;object-fit:contain;background:#223550;border-radius:10px;display:block;margin:0 auto 12px}
+h2{font-size:20px}
 .muted{color:var(--muted)}
-.status{min-height:22px;color:#8fc3ff}
-input{width:100%;padding:12px;background:#101827;color:white;border:1px solid var(--border);border-radius:8px;margin:7px 0}
+.status{color:#8fc3ff;min-height:20px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+input{width:100%;padding:12px;background:var(--bg);color:white;border:1px solid var(--border);border-radius:8px}
+.toolbar input{flex:1;min-width:180px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:15px}
+.card{min-width:0;overflow:hidden;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px}
+.game-thumbnail{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#223550;border-radius:8px}
+.game-logo{width:65px;height:65px;object-fit:contain;margin-top:10px}
+.game-title{margin:10px 0}
+.game-play{display:block;text-align:center;text-decoration:none;color:white;padding:11px;border-radius:8px;background:var(--blue)}
+.item-image{display:block;width:100%;max-width:220px;aspect-ratio:1;object-fit:contain;background:#223550;border-radius:10px;margin:0 auto 12px}
+.item-price{display:flex;align-items:center;gap:5px}
 [hidden]{display:none!important}
-footer{text-align:center;color:var(--muted);padding:24px}
+footer{text-align:center;color:var(--muted);padding:25px}
 </style>
 </head>
 <body>
 <header>
   <div class="brand">BloxGo</div>
-  <nav>
-    <button class="navbtn" data-section="games"><img class="icon" src="Content/Icons/games_icon.png" alt="">Games</button>
-    <button class="navbtn" data-section="servers"><img class="icon" src="Content/Icons/servers_icon.png" alt="">Servers</button>
-    <button class="navbtn" data-section="catalog">Catalog</button>
-    <button class="navbtn" data-section="inventory">Inventory</button>
-    <button class="navbtn" data-section="earn">Earn</button>
-    <button class="navbtn" data-section="exchange">Exchange</button>
+  <nav aria-label="Main navigation">
+    <button class="navbtn" data-page="games"><img class="icon" src="Content/Icons/games_icon.png" alt="">Games</button>
+    <button class="navbtn" data-page="servers"><img class="icon" src="Content/Icons/servers_icon.png" alt="">Servers</button>
+    <button class="navbtn" data-page="catalog">Catalog</button>
+    <button class="navbtn" data-page="inventory">Inventory</button>
+    <button class="navbtn" data-page="earn">Earn</button>
+    <button class="navbtn" data-page="exchange">Exchange</button>
     <button class="navbtn" id="refresh"><img class="icon" src="Content/Icons/refresh_icon.png" alt="">Refresh</button>
   </nav>
   <div class="balances">
@@ -53,94 +61,104 @@ footer{text-align:center;color:var(--muted);padding:24px}
 </header>
 
 <main>
-  <section id="games">
-    <h1>Games</h1>
-    <p class="muted">Discover games on BloxGo.</p>
-    <input id="gameSearch" placeholder="Search games..." aria-label="Search games">
-    <div id="gameList" class="grid"></div>
-    <p id="gameStatus" class="status">Loading Games...</p>
-  </section>
+<section id="games">
+  <h1>Games</h1>
+  <p class="muted">Discover and play games on BloxGo.</p>
+  <div class="toolbar">
+    <input id="gameSearch" type="search" placeholder="Search games..." aria-label="Search games">
+    <button id="reloadGames" class="primary">Refresh Games</button>
+  </div>
+  <p id="gameStatus" class="status" role="status">Loading Games...</p>
+  <div id="gameList" class="grid"></div>
+</section>
 
-  <section id="servers" hidden>
-    <h1>Servers</h1>
-    <div class="card">
-      <label for="serverAddress">Server Address</label>
+<section id="servers" hidden>
+  <h1>Servers</h1>
+  <div class="card">
+    <label for="serverAddress">Server Address</label>
+    <div class="toolbar">
       <input id="serverAddress" placeholder="Enter server address">
       <button class="primary" id="connect">Connect</button>
-      <p id="serverStatus" class="status">Enter an address to continue.</p>
-      <p class="muted">A compatible server service is required for real connections.</p>
     </div>
-  </section>
+    <p id="serverStatus" class="status">Enter a server address to continue.</p>
+    <p class="muted">A compatible server service is required for actual connections.</p>
+  </div>
+</section>
 
-  <section id="catalog" hidden>
-    <h1>Catalog</h1>
-    <div class="grid">
-      <article class="card">
-        <img class="item-image" src="Content/Faces/epicface.png" alt="Epic Face">
-        <h2>Epic Face</h2>
-        <p>Price: <img class="icon" src="Content/Icons/Robux_Icon.png" alt="Robux"> <strong>79</strong></p>
-        <button class="primary" id="buyEpic">Buy Epic Face</button>
-        <p id="buyStatus" class="status"></p>
-      </article>
-    </div>
-  </section>
+<section id="catalog" hidden>
+  <h1>Catalog</h1>
+  <div class="grid">
+    <article class="card">
+      <img class="item-image" src="Content/Faces/epicface.png" alt="Epic Face">
+      <h2>Epic Face</h2>
+      <p class="item-price"><img class="icon" src="Content/Icons/Robux_Icon.png" alt="Robux"><strong>79</strong></p>
+      <button class="primary" id="buyEpic">Buy Epic Face</button>
+      <p id="buyStatus" class="status" role="status"></p>
+    </article>
+  </div>
+</section>
 
-  <section id="inventory" hidden>
-    <h1>Inventory</h1>
-    <p class="muted">Your owned items appear here.</p>
-    <div id="inventoryList" class="grid"></div>
-    <p id="inventoryEmpty" class="muted">Your inventory is empty.</p>
-  </section>
+<section id="inventory" hidden>
+  <h1>Inventory</h1>
+  <p class="muted">Items you own appear here.</p>
+  <div id="inventoryList" class="grid"></div>
+  <p id="inventoryEmpty" class="muted">Your inventory is empty.</p>
+</section>
 
-  <section id="earn" hidden>
-    <h1>Earn Rewards</h1>
-    <div class="card">
+<section id="earn" hidden>
+  <h1>Earn Rewards</h1>
+  <div class="grid">
+    <article class="card">
       <h2>Daily Reward</h2>
       <p>Claim 10 Tix once per day.</p>
       <button class="primary" id="dailyReward">Claim Reward</button>
-      <p id="earnStatus" class="status"></p>
-    </div>
-    <div class="card" style="margin-top:14px">
+      <p id="dailyStatus" class="status" role="status"></p>
+    </article>
+    <article class="card">
       <h2>Welcome Reward</h2>
       <p>Claim 25 Tix once in this browser.</p>
       <button id="welcomeReward">Claim 25 Tix</button>
-      <p id="welcomeStatus" class="status"></p>
-    </div>
-  </section>
+      <p id="welcomeStatus" class="status" role="status"></p>
+    </article>
+  </div>
+</section>
 
-  <section id="exchange" hidden>
-    <h1>Currency Exchange</h1>
-    <div class="card">
-      <p>Exchange rate: <strong>10 Tix = 5 Robux</strong></p>
-      <label for="exchangeAmount">Tix amount (multiples of 10)</label>
+<section id="exchange" hidden>
+  <h1>Currency Exchange</h1>
+  <div class="card">
+    <p>Exchange rate: <strong>10 Tix = 5 Robux</strong></p>
+    <label for="exchangeAmount">Tix amount (multiples of 10)</label>
+    <div class="toolbar">
       <input id="exchangeAmount" type="number" min="10" step="10" value="10">
-      <button class="primary" id="exchangeButton">Exchange Tix</button>
-      <p id="exchangeStatus" class="status"></p>
+      <button class="primary" id="exchangeButton">Exchange</button>
     </div>
-  </section>
+    <p id="exchangeStatus" class="status" role="status"></p>
+  </div>
+</section>
 </main>
 <footer>BloxGo — Community Gaming</footer>
 
 <script>
 "use strict";
 
-const $ = id => document.getElementById(id);
-const STORAGE_KEY = "bloxgo_demo_state_v1";
-const DEFAULT_STATE = {robux:100,tix:0,inventory:[],dailyClaim:"",welcomeClaimed:false};
+const $=id=>document.getElementById(id);
+const KEY="bloxgo_demo_v2";
+const DEFAULT={robux:100,tix:0,inventory:[],dailyDate:"",welcomeClaimed:false};
 
 function readState(){
   try{
-    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if(saved && typeof saved.robux==="number" && typeof saved.tix==="number"
-       && Array.isArray(saved.inventory)) return {...DEFAULT_STATE,...saved};
-  }catch(e){}
-  return {...DEFAULT_STATE};
+    const data=JSON.parse(localStorage.getItem(KEY));
+    if(data&&Number.isFinite(data.robux)&&Number.isFinite(data.tix)&&Array.isArray(data.inventory)){
+      return {...DEFAULT,...data};
+    }
+  }catch(error){console.warn("Unable to read saved data",error)}
+  return {...DEFAULT};
 }
 let state=readState();
 
 function saveState(){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
-  catch(e){console.warn("Could not save demo data.",e);}
+  try{localStorage.setItem(KEY,JSON.stringify(state))}
+  catch(error){console.warn("Unable to save data",error)}
 }
 function renderBalances(){
   $("robux").textContent=state.robux;
@@ -153,15 +171,15 @@ function renderInventory(){
   state.inventory.forEach(item=>{
     const card=document.createElement("article");
     card.className="card";
-    const img=document.createElement("img");
-    img.className="item-image";
-    img.src=item.image;
-    img.alt=item.name;
-    const name=document.createElement("h2");
-    name.textContent=item.name;
+    const image=document.createElement("img");
+    image.className="item-image";
+    image.src=item.image;
+    image.alt=item.name;
+    const title=document.createElement("h2");
+    title.textContent=item.name;
     const owned=document.createElement("p");
     owned.textContent="Owned";
-    card.append(img,name,owned);
+    card.append(image,title,owned);
     list.append(card);
   });
 }
@@ -170,17 +188,77 @@ function update(){
   renderInventory();
   saveState();
 }
-function showSection(id){
+function showPage(id){
   document.querySelectorAll("main section").forEach(section=>{
     section.hidden=section.id!==id;
   });
 }
-document.querySelectorAll("[data-section]").forEach(button=>{
-  button.addEventListener("click",()=>showSection(button.dataset.section));
+document.querySelectorAll("[data-page]").forEach(button=>{
+  button.addEventListener("click",()=>showPage(button.dataset.page));
 });
 
+function makeGameCard(game){
+  const name=String(game.name||"Untitled Game");
+  const folder=String(game.folder||name);
+  const base="Games/"+folder.split("/").map(encodeURIComponent).join("/")+"/";
+  const card=document.createElement("article");
+  card.className="card";
+
+  const thumbnail=document.createElement("img");
+  thumbnail.className="game-thumbnail";
+  thumbnail.src=game.thumbnail||base+"thumbnail.png";
+  thumbnail.alt=name+" thumbnail";
+  thumbnail.onerror=()=>{thumbnail.hidden=true};
+
+  const logo=document.createElement("img");
+  logo.className="game-logo";
+  logo.src=game.logo||base+"logo.png";
+  logo.alt=name+" logo";
+  logo.onerror=()=>{logo.hidden=true};
+
+  const title=document.createElement("h2");
+  title.className="game-title";
+  title.textContent=name;
+
+  const play=document.createElement("a");
+  play.className="game-play";
+  play.textContent="Play";
+  play.href=game.url||base+"index.html";
+
+  card.append(thumbnail,logo,title,play);
+  return card;
+}
+
+let allGames=[];
+async function loadGames(){
+  $("gameStatus").textContent="Loading Games...";
+  $("gameList").replaceChildren();
+  try{
+    const response=await fetch("games.json",{cache:"no-store"});
+    if(!response.ok)throw new Error("HTTP "+response.status);
+    const data=await response.json();
+    if(!Array.isArray(data))throw new Error("games.json must be an array");
+    allGames=data;
+    renderGames();
+  }catch(error){
+    console.error("BloxGo game loading:",error);
+    $("gameStatus").textContent="Could not load games.json. Check your repository and GitHub Pages settings.";
+  }
+}
+function renderGames(){
+  const query=$("gameSearch").value.trim().toLowerCase();
+  const filtered=allGames.filter(game=>String(game.name||"").toLowerCase().includes(query));
+  $("gameList").replaceChildren();
+  filtered.forEach(game=>$("gameList").append(makeGameCard(game)));
+  $("gameStatus").textContent=filtered.length
+    ?filtered.length+" game(s) available."
+    :"No games found.";
+}
+$("gameSearch").addEventListener("input",renderGames);
+$("refresh").addEventListener("click",loadGames);
+$("reloadGames").addEventListener("click",loadGames);
+
 $("buyEpic").addEventListener("click",()=>{
-  $("buyStatus").textContent="";
   if(state.inventory.some(item=>item.id==="epicface")){
     $("buyStatus").textContent="You already own Epic Face.";
     return;
@@ -190,25 +268,21 @@ $("buyEpic").addEventListener("click",()=>{
     return;
   }
   state.robux-=79;
-  state.inventory.push({
-    id:"epicface",
-    name:"Epic Face",
-    image:"Content/Faces/epicface.png"
-  });
+  state.inventory.push({id:"epicface",name:"Epic Face",image:"Content/Faces/epicface.png"});
   update();
   $("buyStatus").textContent="Epic Face purchased!";
 });
 
 $("dailyReward").addEventListener("click",()=>{
-  const today=new Date().toISOString().slice(0,10);
-  if(state.dailyClaim===today){
-    $("earnStatus").textContent="You have already claimed today's reward.";
+  const today=new Date().toLocaleDateString("en-CA");
+  if(state.dailyDate===today){
+    $("dailyStatus").textContent="You have already claimed today's reward.";
     return;
   }
   state.tix+=10;
-  state.dailyClaim=today;
+  state.dailyDate=today;
   update();
-  $("earnStatus").textContent="You received 10 Tix!";
+  $("dailyStatus").textContent="You received 10 Tix!";
 });
 
 $("welcomeReward").addEventListener("click",()=>{
@@ -235,54 +309,15 @@ $("exchangeButton").addEventListener("click",()=>{
   state.tix-=amount;
   state.robux+=(amount/10)*5;
   update();
-  $("exchangeStatus").textContent=`Exchanged ${amount} Tix for ${(amount/10)*5} Robux.`;
+  $("exchangeStatus").textContent="Exchange successful: "+amount+" Tix for "+(amount/10*5)+" Robux.";
 });
 
 $("connect").addEventListener("click",()=>{
   const address=$("serverAddress").value.trim();
   $("serverStatus").textContent=address
-    ? "Address entered. A compatible server connection is not configured yet."
-    : "Please enter a server address.";
+    ?"Address entered. A compatible server connection is not configured."
+    :"Please enter a server address.";
 });
-
-async function loadGames(){
-  $("gameStatus").textContent="Loading Games...";
-  $("gameList").replaceChildren();
-  try{
-    const response=await fetch("games.json",{cache:"no-store"});
-    if(!response.ok) throw new Error("HTTP "+response.status);
-    const games=await response.json();
-    if(!Array.isArray(games)) throw new Error("Invalid games.json");
-    const query=$("gameSearch").value.trim().toLowerCase();
-    const filtered=games.filter(game=>String(game.name||"").toLowerCase().includes(query));
-    if(!filtered.length){
-      $("gameStatus").textContent="No games found.";
-      return;
-    }
-    filtered.forEach(game=>{
-      const card=document.createElement("article");
-      card.className="card";
-      const title=document.createElement("h2");
-      title.textContent=game.name||"Untitled Game";
-      const play=document.createElement("button");
-      play.className="primary";
-      play.textContent="Play";
-      play.addEventListener("click",()=>{
-        const folder=game.folder||game.name;
-        const url=game.url||("Games/"+String(folder).split("/").map(encodeURIComponent).join("/")+"/index.html");
-        location.href=url;
-      });
-      card.append(title,play);
-      $("gameList").append(card);
-    });
-    $("gameStatus").textContent=`${filtered.length} game(s) available.`;
-  }catch(error){
-    console.error(error);
-    $("gameStatus").textContent="Could not load games.json. Check your GitHub repository.";
-  }
-}
-$("gameSearch").addEventListener("input",loadGames);
-$("refresh").addEventListener("click",loadGames);
 
 update();
 loadGames();
