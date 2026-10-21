@@ -4,323 +4,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101827">
 <title>BloxGo</title>
 <style>
-:root{color-scheme:dark;--bg:#101827;--panel:#19263a;--border:#2a3b54;--blue:#1685ff;--text:#f4f7ff;--muted:#a9b8ce}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
-button,input{font:inherit}
-button,a{cursor:pointer}
-button{background:#223550;color:white;border:1px solid var(--border);border-radius:9px;padding:10px 13px}
-button:hover{background:#304766}
-.primary{background:var(--blue);border-color:var(--blue)}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:15px 18px;background:var(--panel);border-bottom:1px solid var(--border)}
-.brand{font-size:26px;font-weight:bold;color:#62aaff}
-nav,.balances{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.navbtn{display:inline-flex;align-items:center;gap:7px}
-.icon{width:23px;height:23px;object-fit:contain;vertical-align:middle}
-.balance{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:8px 10px}
-main{max-width:1100px;margin:auto;padding:22px 16px}
-section{margin-bottom:30px}
-h1{font-size:27px}
-h2{font-size:20px}
-.muted{color:var(--muted)}
-.status{color:#8fc3ff;min-height:20px}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
-input{width:100%;padding:12px;background:var(--bg);color:white;border:1px solid var(--border);border-radius:8px}
-.toolbar input{flex:1;min-width:180px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:15px}
-.card{min-width:0;overflow:hidden;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px}
-.game-thumbnail{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#223550;border-radius:8px}
-.game-logo{width:65px;height:65px;object-fit:contain;margin-top:10px}
-.game-title{margin:10px 0}
-.game-play{display:block;text-align:center;text-decoration:none;color:white;padding:11px;border-radius:8px;background:var(--blue)}
-.item-image{display:block;width:100%;max-width:220px;aspect-ratio:1;object-fit:contain;background:#223550;border-radius:10px;margin:0 auto 12px}
-.item-price{display:flex;align-items:center;gap:5px}
-[hidden]{display:none!important}
-footer{text-align:center;color:var(--muted);padding:25px}
+body{margin:0;background:#081321;color:#fff;font:16px Arial}header,nav,.card,.panel{background:#12233a;padding:15px}header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}nav{display:flex;gap:6px;flex-wrap:wrap}button{background:#167cff;color:white;border:0;border-radius:7px;padding:10px;margin:3px;cursor:pointer}input{padding:11px;margin:5px 0;background:#091729;color:white;border:1px solid #345;border-radius:7px}main{padding:18px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}.card{border-radius:10px}.thumb{width:100%;aspect-ratio:16/9;object-fit:cover}.face{width:100%;height:120px;object-fit:contain}.muted{color:#9db4d1}
 </style>
 </head>
 <body>
-<header>
-  <div class="brand">BloxGo</div>
-  <nav aria-label="Main navigation">
-    <button class="navbtn" data-page="games"><img class="icon" src="Content/Icons/games_icon.png" alt="">Games</button>
-    <button class="navbtn" data-page="servers"><img class="icon" src="Content/Icons/servers_icon.png" alt="">Servers</button>
-    <button class="navbtn" data-page="catalog">Catalog</button>
-    <button class="navbtn" data-page="inventory">Inventory</button>
-    <button class="navbtn" data-page="earn">Earn</button>
-    <button class="navbtn" data-page="exchange">Exchange</button>
-    <button class="navbtn" id="refresh"><img class="icon" src="Content/Icons/refresh_icon.png" alt="">Refresh</button>
-  </nav>
-  <div class="balances">
-    <div class="balance"><img class="icon" src="Content/Icons/Robux_Icon.png" alt="Robux"><strong id="robux">0</strong></div>
-    <div class="balance"><img class="icon" src="Content/Icons/Tix.png" alt="Tix"><strong id="tix">0</strong></div>
-  </div>
-</header>
+<header><b>BloxGo</b><span><img width="22" src="Content/Icons/Robux_Icon.png" alt="Robux"> <span id="r">100</span>　<img width="22" src="Content/Icons/Tix.png" alt="Tix"> <span id="t">25</span></span></header>
+<nav id="nav"></nav><main id="app"></main>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+import{getFirestore,doc,getDoc,setDoc}from"https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-<main>
-<section id="games">
-  <h1>Games</h1>
-  <p class="muted">Discover and play games on BloxGo.</p>
-  <div class="toolbar">
-    <input id="gameSearch" type="search" placeholder="Search games..." aria-label="Search games">
-    <button id="reloadGames" class="primary">Refresh Games</button>
-  </div>
-  <p id="gameStatus" class="status" role="status">Loading Games...</p>
-  <div id="gameList" class="grid"></div>
-</section>
+const fb=initializeApp({apiKey:"AIzaSyBui_UWCNABfF3wBYBMzi6Q5dLGvykfhaM",authDomain:"bloxgo-data.firebaseapp.com",projectId:"bloxgo-data",storageBucket:"bloxgo-data.firebasestorage.app",messagingSenderId:"905482130911",appId:"1:905482130911:web:273e391163a595ca32606a"});
+const auth=getAuth(fb),db=getFirestore(fb),$=id=>document.getElementById(id);
+const faces=[{id:"smile",name:"Smile",image:"Content/Faces/smile.png",price:0},{id:"epicface",name:"Epic Face",image:"Content/Faces/epicface.png",price:79}];
+let s;try{s=JSON.parse(localStorage.bgState)}catch{}
+s={r:100,t:25,owned:[],face:"smile",welcome:false,daily:"",...(s||{})};
+let user=null,username="",games=[],mode="login";
+const save=()=>{localStorage.bgState=JSON.stringify(s);$("r").textContent=s.r;$("t").textContent=s.t};
+const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const path=x=>x.split("/").map(encodeURIComponent).join("/");
+const names=["Games","Servers","Catalog","Inventory","Avatar","Earn","Exchange","Account"];
+$("nav").innerHTML=names.map(x=>`<button data-p="${x}">${x}</button>`).join("")+`<button id="refresh">Refresh</button>`;
+$("nav").onclick=e=>{let p=e.target.dataset.p;if(p)show(p);if(e.target.id==="refresh")loadGames()};
+function show(p){$("app").dataset.page=p;$("nav").querySelectorAll("button").forEach(b=>b.style.opacity=b.dataset.p===p?1:.7);({Games:renderGames,Servers:servers,Catalog:catalog,Inventory:inventory,Avatar:avatar,Earn:earn,Exchange:exchange,Account:account}[p]||renderGames)()}
+async function loadGames(){try{let r=await fetch("games.json");if(!r.ok)throw 0;games=await r.json();renderGames()}catch{$("app").innerHTML="<h1>Games</h1><p>Could not load games.json.</p>"}}
+function renderGames(){ $("app").innerHTML=`<h1>Games</h1><input id="search" placeholder="Search games"><div class="grid" id="list"></div>`;const draw=()=>{$("list").innerHTML=games.filter(g=>g.name.toLowerCase().includes($("search").value.toLowerCase())).map(g=>`<div class="card"><img class="thumb" src="Games/${path(g.folder)}/thumbnail.png" alt="${esc(g.name)}"><h3>${esc(g.name)}</h3><button onclick="location.href='Games/${path(g.folder)}/index.html'">Play</button></div>`).join("")||"No games found"};$("search").oninput=draw;draw()}
+function catalog(){$("app").innerHTML="<h1>Catalog</h1><div class=grid>"+faces.map(f=>`<div class=card><img class=face src="${f.image}" alt="${f.name}"><h3>${f.name}</h3><p>${f.price} Robux</p><button onclick="buy('${f.id}')">${s.owned.includes(f.id)?"Owned":f.price?"Buy":"Get Free"}</button></div>`).join("")+"</div>"}
+window.buy=id=>{let f=faces.find(x=>x.id===id);if(s.owned.includes(id))return alert("Already owned.");if(s.r<f.price)return alert("Not enough Robux.");s.r-=f.price;s.owned.push(id);save();catalog()};
+function inventory(){$("app").innerHTML="<h1>Inventory</h1><div class=grid>"+faces.filter(f=>s.owned.includes(f.id)).map(f=>`<div class=card><img class=face src="${f.image}" alt="${f.name}"><h3>${f.name}</h3><button onclick="wear('${f.id}')">${s.face===f.id?"Equipped":"Wear"}</button></div>`).join("")+"</div>"}
+window.wear=id=>{s.face=id;save();inventory()};
+function avatar(){let f=faces.find(x=>x.id===s.face)||faces[0];$("app").innerHTML=`<h1>Avatar</h1><div class=panel><img class=face src="${f.image}" alt="${f.name}"><h3>${f.name}</h3><button onclick="show('Inventory')">Inventory</button></div>`}
+function earn(){$("app").innerHTML=`<h1>Earn</h1><button onclick="reward()">Claim Welcome Reward</button><button onclick="daily()">Claim Daily Reward</button><p>Rewards are stored on this device.</p>`}
+window.reward=()=>{if(s.welcome)return alert("Already claimed.");s.welcome=true;s.t+=25;save();earn()};
+window.daily=()=>{let d=new Date().toISOString().slice(0,10);if(s.daily===d)return alert("Already claimed today.");s.daily=d;s.t+=10;save();earn()};
+function exchange(){$("app").innerHTML=`<h1>Exchange</h1><p>${s.t} Tix to ${Math.floor(s.t/10)*5} Robux</p><button onclick="convert()">Exchange 10 Tix for 5 Robux</button>`}
+window.convert=()=>{if(s.t<10)return alert("Not enough Tix.");s.t-=10;s.r+=5;save();exchange()};
+function servers(){let a;try{a=JSON.parse(localStorage.bgServers)||[]}catch{a=[]}$("app").innerHTML=`<h1>Servers</h1><input id="sn" placeholder="Server name"><input id="su" placeholder="Server URL"><button onclick="addServer()">Add Server</button><div class=grid>${a.map((x,i)=>`<div class=card><h3>${esc(x.n)}</h3><p>${esc(x.u)}</p><button onclick="connectServer(${i})">Connect</button><button onclick="removeServer(${i})">Delete</button></div>`).join("")}</div>`}
+window.addServer=()=>{let a=JSON.parse(localStorage.bgServers||"[]");if(!$("sn").value.trim()||!$("su").value.trim())return alert("Enter a name and URL.");a.push({n:$("sn").value.trim(),u:$("su").value.trim()});localStorage.bgServers=JSON.stringify(a);servers()};
+window.connectServer=i=>{let a=JSON.parse(localStorage.bgServers||"[]");try{let u=new URL(a[i].u);if(!["http:","https:"].includes(u.protocol))throw 0;open(u.href,"_blank","noopener")}catch{alert("Enter a valid web URL.")}};
+window.removeServer=i=>{let a=JSON.parse(localStorage.bgServers||"[]");a.splice(i,1);localStorage.bgServers=JSON.stringify(a);servers()};
 
-<section id="servers" hidden>
-  <h1>Servers</h1>
-  <div class="card">
-    <label for="serverAddress">Server Address</label>
-    <div class="toolbar">
-      <input id="serverAddress" placeholder="Enter server address">
-      <button class="primary" id="connect">Connect</button>
-    </div>
-    <p id="serverStatus" class="status">Enter a server address to continue.</p>
-    <p class="muted">A compatible server service is required for actual connections.</p>
-  </div>
-</section>
-
-<section id="catalog" hidden>
-  <h1>Catalog</h1>
-  <div class="grid">
-    <article class="card">
-      <img class="item-image" src="Content/Faces/epicface.png" alt="Epic Face">
-      <h2>Epic Face</h2>
-      <p class="item-price"><img class="icon" src="Content/Icons/Robux_Icon.png" alt="Robux"><strong>79</strong></p>
-      <button class="primary" id="buyEpic">Buy Epic Face</button>
-      <p id="buyStatus" class="status" role="status"></p>
-    </article>
-  </div>
-</section>
-
-<section id="inventory" hidden>
-  <h1>Inventory</h1>
-  <p class="muted">Items you own appear here.</p>
-  <div id="inventoryList" class="grid"></div>
-  <p id="inventoryEmpty" class="muted">Your inventory is empty.</p>
-</section>
-
-<section id="earn" hidden>
-  <h1>Earn Rewards</h1>
-  <div class="grid">
-    <article class="card">
-      <h2>Daily Reward</h2>
-      <p>Claim 10 Tix once per day.</p>
-      <button class="primary" id="dailyReward">Claim Reward</button>
-      <p id="dailyStatus" class="status" role="status"></p>
-    </article>
-    <article class="card">
-      <h2>Welcome Reward</h2>
-      <p>Claim 25 Tix once in this browser.</p>
-      <button id="welcomeReward">Claim 25 Tix</button>
-      <p id="welcomeStatus" class="status" role="status"></p>
-    </article>
-  </div>
-</section>
-
-<section id="exchange" hidden>
-  <h1>Currency Exchange</h1>
-  <div class="card">
-    <p>Exchange rate: <strong>10 Tix = 5 Robux</strong></p>
-    <label for="exchangeAmount">Tix amount (multiples of 10)</label>
-    <div class="toolbar">
-      <input id="exchangeAmount" type="number" min="10" step="10" value="10">
-      <button class="primary" id="exchangeButton">Exchange</button>
-    </div>
-    <p id="exchangeStatus" class="status" role="status"></p>
-  </div>
-</section>
-</main>
-<footer>BloxGo — Community Gaming</footer>
-
-<script>
-"use strict";
-
-const $=id=>document.getElementById(id);
-const KEY="bloxgo_demo_v2";
-const DEFAULT={robux:100,tix:0,inventory:[],dailyDate:"",welcomeClaimed:false};
-
-function readState(){
-  try{
-    const data=JSON.parse(localStorage.getItem(KEY));
-    if(data&&Number.isFinite(data.robux)&&Number.isFinite(data.tix)&&Array.isArray(data.inventory)){
-      return {...DEFAULT,...data};
-    }
-  }catch(error){console.warn("Unable to read saved data",error)}
-  return {...DEFAULT};
-}
-let state=readState();
-
-function saveState(){
-  try{localStorage.setItem(KEY,JSON.stringify(state))}
-  catch(error){console.warn("Unable to save data",error)}
-}
-function renderBalances(){
-  $("robux").textContent=state.robux;
-  $("tix").textContent=state.tix;
-}
-function renderInventory(){
-  const list=$("inventoryList");
-  list.replaceChildren();
-  $("inventoryEmpty").hidden=state.inventory.length>0;
-  state.inventory.forEach(item=>{
-    const card=document.createElement("article");
-    card.className="card";
-    const image=document.createElement("img");
-    image.className="item-image";
-    image.src=item.image;
-    image.alt=item.name;
-    const title=document.createElement("h2");
-    title.textContent=item.name;
-    const owned=document.createElement("p");
-    owned.textContent="Owned";
-    card.append(image,title,owned);
-    list.append(card);
-  });
-}
-function update(){
-  renderBalances();
-  renderInventory();
-  saveState();
-}
-function showPage(id){
-  document.querySelectorAll("main section").forEach(section=>{
-    section.hidden=section.id!==id;
-  });
-}
-document.querySelectorAll("[data-page]").forEach(button=>{
-  button.addEventListener("click",()=>showPage(button.dataset.page));
-});
-
-function makeGameCard(game){
-  const name=String(game.name||"Untitled Game");
-  const folder=String(game.folder||name);
-  const base="Games/"+folder.split("/").map(encodeURIComponent).join("/")+"/";
-  const card=document.createElement("article");
-  card.className="card";
-
-  const thumbnail=document.createElement("img");
-  thumbnail.className="game-thumbnail";
-  thumbnail.src=game.thumbnail||base+"thumbnail.png";
-  thumbnail.alt=name+" thumbnail";
-  thumbnail.onerror=()=>{thumbnail.hidden=true};
-
-  const logo=document.createElement("img");
-  logo.className="game-logo";
-  logo.src=game.logo||base+"logo.png";
-  logo.alt=name+" logo";
-  logo.onerror=()=>{logo.hidden=true};
-
-  const title=document.createElement("h2");
-  title.className="game-title";
-  title.textContent=name;
-
-  const play=document.createElement("a");
-  play.className="game-play";
-  play.textContent="Play";
-  play.href=game.url||base+"index.html";
-
-  card.append(thumbnail,logo,title,play);
-  return card;
-}
-
-let allGames=[];
-async function loadGames(){
-  $("gameStatus").textContent="Loading Games...";
-  $("gameList").replaceChildren();
-  try{
-    const response=await fetch("games.json",{cache:"no-store"});
-    if(!response.ok)throw new Error("HTTP "+response.status);
-    const data=await response.json();
-    if(!Array.isArray(data))throw new Error("games.json must be an array");
-    allGames=data;
-    renderGames();
-  }catch(error){
-    console.error("BloxGo game loading:",error);
-    $("gameStatus").textContent="Could not load games.json. Check your repository and GitHub Pages settings.";
-  }
-}
-function renderGames(){
-  const query=$("gameSearch").value.trim().toLowerCase();
-  const filtered=allGames.filter(game=>String(game.name||"").toLowerCase().includes(query));
-  $("gameList").replaceChildren();
-  filtered.forEach(game=>$("gameList").append(makeGameCard(game)));
-  $("gameStatus").textContent=filtered.length
-    ?filtered.length+" game(s) available."
-    :"No games found.";
-}
-$("gameSearch").addEventListener("input",renderGames);
-$("refresh").addEventListener("click",loadGames);
-$("reloadGames").addEventListener("click",loadGames);
-
-$("buyEpic").addEventListener("click",()=>{
-  if(state.inventory.some(item=>item.id==="epicface")){
-    $("buyStatus").textContent="You already own Epic Face.";
-    return;
-  }
-  if(state.robux<79){
-    $("buyStatus").textContent="Not enough Robux.";
-    return;
-  }
-  state.robux-=79;
-  state.inventory.push({id:"epicface",name:"Epic Face",image:"Content/Faces/epicface.png"});
-  update();
-  $("buyStatus").textContent="Epic Face purchased!";
-});
-
-$("dailyReward").addEventListener("click",()=>{
-  const today=new Date().toLocaleDateString("en-CA");
-  if(state.dailyDate===today){
-    $("dailyStatus").textContent="You have already claimed today's reward.";
-    return;
-  }
-  state.tix+=10;
-  state.dailyDate=today;
-  update();
-  $("dailyStatus").textContent="You received 10 Tix!";
-});
-
-$("welcomeReward").addEventListener("click",()=>{
-  if(state.welcomeClaimed){
-    $("welcomeStatus").textContent="Welcome reward already claimed.";
-    return;
-  }
-  state.tix+=25;
-  state.welcomeClaimed=true;
-  update();
-  $("welcomeStatus").textContent="You received 25 Tix!";
-});
-
-$("exchangeButton").addEventListener("click",()=>{
-  const amount=Number($("exchangeAmount").value);
-  if(!Number.isSafeInteger(amount)||amount<10||amount%10!==0){
-    $("exchangeStatus").textContent="Enter a multiple of 10 Tix.";
-    return;
-  }
-  if(amount>state.tix){
-    $("exchangeStatus").textContent="Not enough Tix.";
-    return;
-  }
-  state.tix-=amount;
-  state.robux+=(amount/10)*5;
-  update();
-  $("exchangeStatus").textContent="Exchange successful: "+amount+" Tix for "+(amount/10*5)+" Robux.";
-});
-
-$("connect").addEventListener("click",()=>{
-  const address=$("serverAddress").value.trim();
-  $("serverStatus").textContent=address
-    ?"Address entered. A compatible server connection is not configured."
-    :"Please enter a server address.";
-});
-
-update();
-loadGames();
+async function emailFor(n){let b=new TextEncoder().encode(n.toLowerCase()+"|bloxgo-username-v1"),h=await crypto.subtle.digest("SHA-256",b);return"u-"+[...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,"0")).join("")+"@users.bloxgo.invalid"}
+function account(){$("app").innerHTML=`<h1>Account</h1>${user?`<p>Signed in as ${esc(username)}</p><button id=logout>Log Out</button>`:`<div class=panel><button id=login>Log In</button><button id=register>Create Account</button><form id=form><input id=un required minlength=3 maxlength=20 pattern="[A-Za-z0-9_]+" placeholder="Username"><input id=pw type=password required minlength=6 placeholder="Password"><button id=submit>Log In</button></form><p id=msg></p></div>`}`;if(user){$("logout").onclick=()=>signOut(auth);return}$("login").onclick=()=>{mode="login";$("submit").textContent="Log In"};$("register").onclick=()=>{mode="register";$("submit").textContent="Create Account"};$("form").onsubmit=async e=>{e.preventDefault();let n=$("un").value.trim(),p=$("pw").value;try{let em=await emailFor(n);if(mode==="register"){let c=await createUserWithEmailAndPassword(auth,em,p);await setDoc(doc(db,"users",c.user.uid),{username:n})}else await signInWithEmailAndPassword(auth,em,p)}catch(err){$("msg").textContent=err.code==="auth/email-already-in-use"?"Username already used.":err.code==="auth/invalid-credential"?"Incorrect username or password.":err.message}}}
+onAuthStateChanged(auth,async u=>{user=u;username="";if(u){try{let d=await getDoc(doc(db,"users",u.uid));username=d.exists()?d.data().username:"Player"}catch{username="Player"}}if($("app").dataset.page==="Account")account()});
+save();show("Games");loadGames();
 </script>
 </body>
 </html>
