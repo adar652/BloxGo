@@ -3,183 +3,626 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BloxGo</title>
 <style>
-:root{--bg:#081321;--panel:#12233a;--panel2:#192f4b;--blue:#1687ff;--line:#294563;--muted:#9db4d1}
-*{box-sizing:border-box}
-body{margin:0;background:radial-gradient(ellipse at top,#132b48,#081321 65%);color:#f4f8ff;font:15px Arial,sans-serif;min-height:100vh}
-header{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:15px 22px;background:#0c192bee;border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}
-.brand{font-size:27px;font-weight:900;letter-spacing:-1px;color:#52a9ff}
-.balances,.balance{display:flex;align-items:center;gap:8px}
-.balance img{width:24px;height:24px;object-fit:contain}
-.layout{display:flex;min-height:85vh}
-nav{width:190px;flex-shrink:0;padding:14px 10px;background:#0c192b;border-right:1px solid var(--line)}
-nav button{width:100%;text-align:left;background:transparent;color:#c9d9ed;margin:3px 0}
-nav button.active,nav button:hover{background:#1b416a;color:white}
-main{padding:25px;width:100%;min-width:0;max-width:1500px;margin:auto}
-h1{font-size:29px;margin:0 0 8px}h2{font-size:21px}h3{margin:10px 0}
-p{line-height:1.5}.muted{color:var(--muted)}
-button{background:var(--blue);color:white;border:0;border-radius:8px;padding:11px 15px;font-weight:bold;cursor:pointer;transition:.18s}
-button:hover{filter:brightness(1.15);transform:translateY(-1px)}
-button:disabled{opacity:.5;cursor:wait}
-.secondary{background:#263d58}.danger{background:#a63749}
-input{display:block;width:100%;min-width:0;background:#091729;color:white;border:1px solid #34516f;border-radius:9px;padding:12px;margin:8px 0;outline:none}
-input:focus{border-color:#3995ff}
-.search{max-width:500px;margin:20px 0}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:18px}
-.card,.panel{background:linear-gradient(145deg,#172c46,#0e1a2b);border:1px solid var(--line);border-radius:13px;overflow:hidden}
-.card{transition:transform .2s,border-color .2s}.card:hover{transform:translateY(-3px);border-color:#3995ff}
-.card-body{padding:14px}
-.game-cover{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#182b45}
-.game-title{display:flex;align-items:center;gap:12px}
-.game-logo{width:60px;height:60px;object-fit:contain;border-radius:10px;background:#203955;padding:4px;flex-shrink:0}
-.face-image{width:100%;height:140px;object-fit:contain;padding:12px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.row button{flex:1}
-.panel{padding:18px;margin-top:16px}
-.account-box{max-width:470px;margin:22px auto}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
-.result{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px;background:#12233a;border:1px solid var(--line);border-radius:10px;margin:8px 0}
-.status{color:#9ecbff;overflow-wrap:anywhere}
-.small{font-size:12px}.empty{padding:28px;text-align:center;color:var(--muted);background:#12233a;border-radius:12px}
-footer{text-align:center;color:var(--muted);padding:24px}
-@media(max-width:650px){header{position:static;padding:14px}.layout{display:block}nav{width:100%;display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);gap:5px}nav button{width:auto;flex-shrink:0;white-space:nowrap}main{padding:15px}.grid{grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px}.game-logo{width:45px;height:45px}.card-body{padding:10px}}
+:root {
+  color-scheme: dark;
+  --bg: #07111f;
+  --panel: #101f35;
+  --panel2: #172b47;
+  --blue: #3988ff;
+  --text: #edf5ff;
+  --muted: #9eb2ce;
+  --border: #29415f;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, Arial, sans-serif;
+  background: radial-gradient(ellipse at top, #163761, var(--bg) 65%);
+  color: var(--text);
+  min-height: 100vh;
+}
+header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 16px;
+  background: #091629ed;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.header-row {
+  max-width: 1100px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.brand { font-size: 26px; font-weight: 900; color: #69aaff; }
+.wallet { display: flex; gap: 10px; flex-wrap: wrap; }
+.balance {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 9px 12px;
+}
+.balance img { width: 20px; height: 20px; object-fit: contain; vertical-align: middle; }
+nav {
+  max-width: 1100px;
+  margin: 14px auto 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+button, input {
+  font: inherit;
+  border-radius: 10px;
+}
+button {
+  cursor: pointer;
+  color: white;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+}
+button:hover { border-color: #66a5ff; background: #203d62; }
+button.primary { background: var(--blue); border-color: var(--blue); }
+main { max-width: 1100px; margin: 24px auto; padding: 0 16px 50px; }
+.panel {
+  background: linear-gradient(145deg, #132742, #0b192c);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 18px;
+  box-shadow: 0 12px 35px #0002;
+}
+h1, h2 { margin-top: 0; }
+p, .muted { color: var(--muted); }
+input {
+  width: 100%;
+  color: white;
+  background: #071426;
+  border: 1px solid var(--border);
+  padding: 12px;
+  margin: 6px 0 12px;
+}
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.hidden { display: none !important; }
+#status { white-space: pre-wrap; overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
 <header>
- <div class="brand">BloxGo</div>
- <div class="balances">
-  <div class="balance"><img src="Content/Icons/Robux_Icon.png" alt="Robux"><span id="r">100</span></div>
-  <div class="balance"><img src="Content/Icons/Tix.png" alt="Tix"><span id="t">25</span></div>
-  <button onclick="show('Account')">Account</button>
- </div>
+  <div class="header-row">
+    <div class="brand">BloxGo</div>
+    <div id="wallet" class="wallet hidden">
+      <div class="balance">
+        <img src="Content/Icons/Robux_Icon.png" alt="Robux">
+        <strong id="robuxBalance">0</strong>
+      </div>
+      <div class="balance">
+        <img src="Content/Icons/Tix.png" alt="Tix">
+        <strong id="tixBalance">0</strong>
+      </div>
+    </div>
+    <button id="logoutButton" class="hidden">Log Out</button>
+  </div>
+  <nav>
+    <button data-page="Home">Home</button>
+    <button data-page="Games">Games</button>
+    <button data-page="Servers">Servers</button>
+    <button data-page="Catalog">Catalog</button>
+    <button data-page="Inventory">Inventory</button>
+    <button data-page="Avatar">Avatar</button>
+    <button data-page="Earn">Earn</button>
+    <button data-page="Exchange">Exchange</button>
+    <button data-page="Users">Users</button>
+    <button data-page="Account">Account</button>
+  </nav>
 </header>
-<div class="layout">
-<nav id="nav"></nav>
-<main id="app"></main>
-</div>
-<footer>BloxGo</footer>
+
+<main>
+  <section id="accountPanel" class="panel">
+    <h1>BloxGo Account</h1>
+    <p>Sign in or create your BloxGo account.</p>
+    <label for="username">Username</label>
+    <input id="username" autocomplete="username" maxlength="20"
+           placeholder="Enter username">
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="current-password"
+           placeholder="Enter password">
+    <div class="actions">
+      <button id="loginButton" class="primary">Log In</button>
+      <button id="registerButton">Create Account</button>
+    </div>
+    <p id="status" role="status"></p>
+  </section>
+
+  <section id="page" class="panel">
+    <h1>Welcome to BloxGo</h1>
+    <p>Sign in to load your account balance.</p>
+  </section>
+</main>
 
 <script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
-import{getFirestore,doc,getDoc,setDoc,runTransaction,collection,getDocs,query,where,orderBy,limit}from"https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+import { initializeApp } from
+  "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  runTransaction,
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-const fb=initializeApp({
- apiKey:"AIzaSyBui_UWCNABfF3wBYBMzi6Q5dLGvykfhaM",
- authDomain:"bloxgo-data.firebaseapp.com",
- projectId:"bloxgo-data",
- storageBucket:"bloxgo-data.firebasestorage.app",
- messagingSenderId:"905482130911",
- appId:"1:905482130911:web:273e391163a595ca32606a",
- measurementId:"G-4WYW9MNZ6Z"
+const firebaseConfig = {
+  apiKey: "AIzaSyBui_UWCNABfF3wBYBMzi6Q5dLGvykfhaM",
+  authDomain: "bloxgo-data.firebaseapp.com",
+  projectId: "bloxgo-data",
+  storageBucket: "bloxgo-data.firebasestorage.app",
+  messagingSenderId: "905482130911",
+  appId: "1:905482130911:web:273e391163a595ca32606a",
+  measurementId: "G-4WYW9MNZ6Z"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const $ = id => document.getElementById(id);
+let currentUser = null;
+let currentUsername = "";
+let currentPage = "Home";
+let robux = 0;
+let tix = 0;
+let balanceLoaded = false;
+
+function setStatus(message) {
+  $("status").textContent = message;
+}
+
+function validUsername(name) {
+  return /^[a-zA-Z0-9_]{3,20}$/.test(name);
+}
+
+async function emailFor(username) {
+  const bytes = new TextEncoder().encode(
+    username.toLowerCase() + "|bloxgo-username-v1"
+  );
+  const hash = await crypto.subtle.digest("SHA-256", bytes);
+  const hex = [...new Uint8Array(hash)]
+    .map(b => b.toString(16).padStart(2, "0")).join("");
+  return "u-" + hex + "@users.bloxgo.invalid";
+}
+
+function hideBalances() {
+  balanceLoaded = false;
+  robux = 0;
+  tix = 0;
+  $("wallet").classList.add("hidden");
+  $("robuxBalance").textContent = "—";
+  $("tixBalance").textContent = "—";
+}
+
+function showBalances() {
+  if (!currentUser || !balanceLoaded) return;
+  $("wallet").classList.remove("hidden");
+  $("robuxBalance").textContent = String(robux);
+  $("tixBalance").textContent = String(tix);
+}
+
+async function loadBalances(user) {
+  hideBalances();
+  const snap = await getDoc(doc(db, "users", user.uid));
+
+  if (!snap.exists()) {
+    throw new Error("Account data not found in Firestore.");
+  }
+
+  const data = snap.data();
+  currentUsername = data.username || user.displayName || "";
+  robux = Number.isFinite(Number(data.robux)) ? Number(data.robux) : 0;
+  tix = Number.isFinite(Number(data.tix)) ? Number(data.tix) : 0;
+  balanceLoaded = true;
+  showBalances();
+}
+
+async function register() {
+  const username = $("username").value.trim();
+  const password = $("password").value;
+
+  if (!validUsername(username)) {
+    throw new Error("Username must be 3–20 letters, numbers, or underscores.");
+  }
+  if (password.length < 6) {
+    throw new Error("Password must contain at least 6 characters.");
+  }
+
+  const email = await emailFor(username);
+  const credential = await createUserWithEmailAndPassword(auth, email, password);
+  const user = credential.user;
+  const usernameLower = username.toLowerCase();
+  const usernameRef = doc(db, "usernames", usernameLower);
+  const userRef = doc(db, "users", user.uid);
+
+  try {
+    await runTransaction(db, async tx => {
+      const existing = await tx.get(usernameRef);
+      if (existing.exists()) throw new Error("That username is already taken.");
+
+      tx.set(usernameRef, {
+        uid: user.uid,
+        username,
+        usernameLower
+      });
+
+      tx.set(userRef, {
+        username,
+        usernameLower,
+        createdAt: new Date().toISOString(),
+        robux: 100,
+        tix: 25
+      });
+    });
+    setStatus("Account created successfully.");
+  } catch (error) {
+    await signOut(auth);
+    throw error;
+  }
+}
+
+async function login() {
+  const username = $("username").value.trim();
+  const password = $("password").value;
+
+  if (!validUsername(username)) {
+    throw new Error("Enter a valid username.");
+  }
+  if (!password) throw new Error("Enter your password.");
+
+  const email = await emailFor(username);
+  await signInWithEmailAndPassword(auth, email, password);
+}
+
+function runAction(action) {
+  if (!currentUser || !balanceLoaded) {
+    setStatus("Please log in to use account features.");
+    return;
+  }
+  if (action === "Earn") {
+    $("page").innerHTML = `
+      <h1>Earn</h1>
+      <p>Welcome reward: earn 25 Tix once per account.</p>
+      <button id="welcomeReward" class="primary">Claim Welcome Reward</button>
+      <p id="earnStatus"></p>`;
+    $("welcomeReward").onclick = () =>
+      claimReward("welcomeRewardClaimed", 25);
+    return;
+  }
+  if (action === "Exchange") {
+    $("page").innerHTML = `
+      <h1>Exchange</h1>
+      <p>Exchange rate: 10 Tix = 5 Robux.</p>
+      <label for="exchangeAmount">Tix amount (multiples of 10)</label>
+      <input id="exchangeAmount" type="number" min="10" step="10" value="10">
+      <button id="exchangeButton" class="primary">Exchange</button>
+      <p id="exchangeStatus"></p>`;
+    $("exchangeButton").onclick = exchangeTix;
+    return;
+  }
+  if (action === "Account") {
+    $("page").innerHTML = `
+      <h1>Account</h1>
+      <p>Username: ${escapeHtml(currentUsername)}</p>
+      <p>Robux: ${robux} | Tix: ${tix}</p>
+      <button id="accountLogout">Log Out</button>`;
+    $("accountLogout").onclick = () => signOut(auth);
+    return;
+  }
+  setStatus("Signed in as " + currentUsername + ".");
+}
+
+async function claimReward(field, amount) {
+  const userRef = doc(db, "users", currentUser.uid);
+  try {
+    await runTransaction(db, async tx => {
+      const snap = await tx.get(userRef);
+      if (!snap.exists()) throw new Error("Account data missing.");
+      if (snap.data()[field]) throw new Error("This reward was already claimed.");
+      tx.update(userRef, {
+        tix: Number(snap.data().tix || 0) + amount,
+        [field]: true
+      });
+    });
+    await loadBalances(currentUser);
+    $("earnStatus").textContent = "Reward claimed!";
+  } catch (error) {
+    $("earnStatus").textContent = error.message;
+  }
+}
+
+async function exchangeTix() {
+  const amount = Number($("exchangeAmount").value);
+  const status = $("exchangeStatus");
+
+  if (!Number.isInteger(amount) || amount < 10 || amount % 10 !== 0) {
+    status.textContent = "Enter a multiple of 10 Tix.";
+    return;
+  }
+
+  const userRef = doc(db, "users", currentUser.uid);
+  try {
+    await runTransaction(db, async tx => {
+      const snap = await tx.get(userRef);
+      if (!snap.exists()) throw new Error("Account data missing.");
+      const data = snap.data();
+      const oldTix = Number(data.tix || 0);
+      const oldRobux = Number(data.robux || 0);
+
+      if (oldTix < amount) throw new Error("Not enough Tix.");
+
+      tx.update(userRef, {
+        tix: oldTix - amount,
+        robux: oldRobux + (amount / 2)
+      });
+    });
+    await loadBalances(currentUser);
+    status.textContent = "Exchange complete.";
+  } catch (error) {
+    status.textContent = error.message;
+  }
+}
+
+async function searchUsers() {
+  if (!currentUser) {
+    $("page").innerHTML = "<h1>Users</h1><p>Please log in to search users.</p>";
+    return;
+  }
+
+  $("page").innerHTML = `
+    <h1>Users</h1>
+    <input id="userSearch" placeholder="Search username">
+    <button id="searchButton" class="primary">Search</button>
+    <div id="userResults"></div>`;
+
+  $("searchButton").onclick = async () => {
+    const term = $("userSearch").value.trim().toLowerCase();
+    const results = $("userResults");
+    if (!term) {
+      results.textContent = "Enter a username.";
+      return;
+    }
+    try {
+      const q = query(
+        collection(db, "usernames"),
+        where("usernameLower", ">=", term),
+        where("usernameLower", "<=", term + "\uf8ff"),
+        orderBy("usernameLower"),
+        limit(20)
+      );
+      const snap = await getDocs(q);
+      results.replaceChildren();
+      if (snap.empty) {
+        results.textContent = "No users found.";
+        return;
+      }
+      snap.forEach(item => {
+        const p = document.createElement("p");
+        p.textContent = item.data().username;
+        results.appendChild(p);
+      });
+    } catch (error) {
+      results.textContent = "Search failed: " + error.message;
+    }
+  };
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[char]);
+}
+
+function showPage(pageName) {
+  currentPage = pageName;
+  if (pageName === "Users") {
+    searchUsers();
+    return;
+  }
+
+  if (pageName === "Games") {
+    $("page").innerHTML = "<h1>Games</h1><div id='gameGrid' class='grid'></div>";
+    loadGames();
+    return;
+  }
+
+  if (pageName === "Catalog") {
+    $("page").innerHTML = `
+      <h1>Catalog</h1>
+      <div class="grid">
+        <article class="panel">
+          <img src="Content/Faces/smile.png" alt="Smile face" width="90">
+          <h2>Smile</h2><p>Free face</p>
+        </article>
+        <article class="panel">
+          <img src="Content/Faces/epicface.png" alt="Epic Face" width="90">
+          <h2>Epic Face</h2><p>79 Robux</p>
+          <button id="buyEpic" class="primary">Buy</button>
+          <p id="catalogStatus"></p>
+        </article>
+      </div>`;
+    $("buyEpic").onclick = () => {
+      $("catalogStatus").textContent =
+        "Catalog purchases need a secure server-side purchase handler.";
+    };
+    return;
+  }
+
+  if (pageName === "Inventory" || pageName === "Avatar") {
+    if (!currentUser) {
+      $("page").innerHTML = `<h1>${pageName}</h1><p>Please log in first.</p>`;
+      return;
+    }
+    $("page").innerHTML = `
+      <h1>${pageName}</h1>
+      <p>Face inventory and equipment will be connected to your account next.</p>`;
+    return;
+  }
+
+  if (pageName === "Servers") {
+    $("page").innerHTML = `
+      <h1>Servers</h1>
+      <p>Add a server address to open a supported web destination.</p>
+      <input id="serverAddress" placeholder="https://example.com">
+      <button id="connectServer" class="primary">Connect</button>
+      <p id="serverStatus"></p>`;
+    $("connectServer").onclick = () => {
+      const raw = $("serverAddress").value.trim();
+      try {
+        const url = new URL(raw);
+        if (url.protocol !== "https:" && url.protocol !== "http:") {
+          throw new Error("Only HTTP and HTTPS addresses are supported.");
+        }
+        window.open(url.href, "_blank", "noopener,noreferrer");
+      } catch (error) {
+        $("serverStatus").textContent = "Enter a valid web address.";
+      }
+    };
+    return;
+  }
+
+  if (pageName === "Earn" || pageName === "Exchange" ||
+      pageName === "Account") {
+    runAction(pageName);
+    return;
+  }
+
+  $("page").innerHTML = `
+    <h1>Welcome to BloxGo</h1>
+    <p>Discover games, customize your avatar, and explore BloxGo.</p>
+    <p>${currentUser ? "Signed in as " + escapeHtml(currentUsername) :
+      "Log in to load your Robux and Tix balances."}</p>`;
+}
+
+async function loadGames() {
+  const grid = $("gameGrid");
+  if (!grid) return;
+
+  try {
+    const response = await fetch("games.json");
+    if (!response.ok) throw new Error("Could not load games.json");
+    const games = await response.json();
+
+    grid.replaceChildren();
+    for (const game of games) {
+      const folder = String(game.folder || game.name);
+      const card = document.createElement("article");
+      card.className = "panel";
+      const image = document.createElement("img");
+      image.src = `Games/${encodeURIComponent(folder)}/thumbnail.png`;
+      image.alt = game.name + " thumbnail";
+      image.style.cssText = "width:100%;height:130px;object-fit:cover;border-radius:10px";
+
+      const logo = document.createElement("img");
+      logo.src = `Games/${encodeURIComponent(folder)}/logo.png`;
+      logo.alt = game.name + " logo";
+      logo.style.cssText = "width:48px;height:48px;object-fit:contain;vertical-align:middle";
+      logo.onerror = () => logo.remove();
+
+      const title = document.createElement("h2");
+      title.textContent = game.name;
+
+      const play = document.createElement("button");
+      play.className = "primary";
+      play.textContent = "Play";
+      play.onclick = () => {
+        location.href = `Games/${encodeURIComponent(folder)}/index.html`;
+      };
+
+      card.append(image, logo, title, play);
+      grid.appendChild(card);
+    }
+  } catch (error) {
+    grid.textContent = "Games could not be loaded. Check games.json and the Games folder.";
+  }
+}
+
+$("loginButton").onclick = async () => {
+  try {
+    setStatus("Logging in...");
+    await login();
+    setStatus("Login successful.");
+  } catch (error) {
+    setStatus(error.message);
+  }
+};
+
+$("registerButton").onclick = async () => {
+  try {
+    setStatus("Creating account...");
+    await register();
+  } catch (error) {
+    setStatus(error.message);
+  }
+};
+
+$("logoutButton").onclick = () => signOut(auth);
+
+document.querySelectorAll("nav button").forEach(button => {
+  button.onclick = () => showPage(button.dataset.page);
 });
-const auth=getAuth(fb),db=getFirestore(fb),$=id=>document.getElementById(id);
-const pages=["Games","Servers","Catalog","Inventory","Avatar","Earn","Exchange","Users","Account"];
-const faces=[
- {id:"smile",name:"Smile",image:"Content/Faces/smile.png",price:0},
- {id:"epicface",name:"Epic Face",image:"Content/Faces/epicface.png",price:79}
-];
-let state={r:100,t:25,owned:[],face:"smile",welcome:false,daily:"",...readState()};
-let games=[],user=null,username="",mode="login",pageName="Games",searchTimer;
-function readState(){try{return JSON.parse(localStorage.getItem("bgState"))||{}}catch{return{}}}
-function save(){localStorage.setItem("bgState",JSON.stringify(state));$("r").textContent=state.r;$("t").textContent=state.t}
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function path(s){return String(s).split("/").map(encodeURIComponent).join("/")}
-function msg(id,s){if($(id))$(id).textContent=s}
-function emailFor(n){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(n.toLowerCase()+"|bloxgo-username-v1")).then(h=>"u-"+[...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,"0")).join("")+"@users.bloxgo.invalid")}
-$("nav").innerHTML=pages.map(p=>`<button data-p="${p}">${p}</button>`).join("")+`<button id="refresh">Refresh</button>`;
-$("nav").onclick=e=>{if(e.target.dataset.p)show(e.target.dataset.p);if(e.target.id==="refresh")loadGames()};
-window.show=function(p){pageName=p;$("nav").querySelectorAll("[data-p]").forEach(b=>b.classList.toggle("active",b.dataset.p===p));({Games:renderGames,Servers:servers,Catalog:catalog,Inventory:inventory,Avatar:avatar,Earn:earn,Exchange:exchange,Users:users,Account:account}[p]||renderGames)()};
 
-async function loadGames(){
- pageName="Games";$("app").innerHTML="<h1>Games</h1><p class=muted>Loading games...</p>";
- try{let r=await fetch("games.json",{cache:"no-store"});if(!r.ok)throw Error();let d=await r.json();if(!Array.isArray(d))throw Error();games=d.filter(g=>g&&typeof g.name==="string"&&typeof g.folder==="string");renderGames()}
- catch{$("app").innerHTML="<h1>Games</h1><div class=empty>Could not load games.json. Check your GitHub files.</div>"}
-}
-window.loadGames=loadGames;
-function renderGames(){
- $("app").innerHTML=`<h1>Games</h1><p class=muted>Discover and play games.</p><input class=search id=gameSearch placeholder="Search games..."><div class=grid id=gameList></div>`;
- const draw=()=>{$("gameList").innerHTML=games.filter(g=>g.name.toLowerCase().includes($("gameSearch").value.toLowerCase())).map(g=>`<article class=card><img class=game-cover src="Games/${path(g.folder)}/thumbnail.png" alt="${esc(g.name)} thumbnail" onerror="this.style.display='none'"><div class=card-body><div class=game-title><img class=game-logo src="Games/${path(g.folder)}/logo.png" alt="${esc(g.name)} logo"><h3>${esc(g.name)}</h3></div><button onclick="play('${esc(g.folder)}')">Play</button></div></article>`).join("")||"<div class=empty>No games found.</div>"};
- $("gameSearch").oninput=draw;draw();
-}
-window.play=f=>location.href="Games/"+path(f)+"/index.html";
+onAuthStateChanged(auth, async user => {
+  currentUser = user;
+  hideBalances();
+  $("logoutButton").classList.toggle("hidden", !user);
+  $("accountPanel").classList.toggle("hidden", !!user);
 
-function catalog(){
- $("app").innerHTML=`<h1>Catalog</h1><p class=muted>Find items for your avatar.</p><div class=grid>${faces.map(f=>`<article class=card><img class=face-image src="${f.image}" alt="${f.name}"><div class=card-body><h3>${f.name}</h3><p class=balance><img width=22 src="Content/Icons/Robux_Icon.png" alt="Robux"> ${f.price}</p><button onclick="buy('${f.id}')">${state.owned.includes(f.id)?"Owned":f.price?"Buy":"Get Free"}</button></div></article>`).join("")}</div>`;
-}
-window.buy=id=>{let f=faces.find(x=>x.id===id);if(!f||state.owned.includes(id))return alert("Already owned.");if(state.r<f.price)return alert("Not enough Robux.");state.r-=f.price;state.owned.push(id);save();catalog()};
-function inventory(){$("app").innerHTML=`<h1>Inventory</h1><div class=grid>${faces.filter(f=>state.owned.includes(f.id)).map(f=>`<article class=card><img class=face-image src="${f.image}" alt="${f.name}"><div class=card-body><h3>${f.name}</h3><button onclick="wear('${f.id}')">${state.face===f.id?"Equipped":"Wear"}</button></div></article>`).join("")||"<div class=empty>Your inventory is empty.</div>"}`}
-window.wear=id=>{if(!state.owned.includes(id))return;state.face=id;save();inventory()};
-function avatar(){let f=faces.find(x=>x.id===state.face)||faces[0];$("app").innerHTML=`<h1>Avatar</h1><div class=panel style="max-width:420px;text-align:center"><img style="width:180px;height:180px;object-fit:contain;background:#dceaff;border-radius:12px" src="${f.image}" alt="${f.name}"><h2>${f.name}</h2><button onclick="show('Inventory')">Inventory</button></div>`}
-function earn(){$("app").innerHTML=`<h1>Earn</h1><div class=grid><div class=panel><h3>Welcome Reward</h3><p>25 Tix</p><button onclick="welcome()">Claim</button></div><div class=panel><h3>Daily Reward</h3><p>10 Tix</p><button onclick="daily()">Claim</button></div></div><p class=muted>Rewards are stored on this device.</p>`}
-window.welcome=()=>{if(state.welcome)return alert("Already claimed.");state.welcome=true;state.t+=25;save();earn()};
-window.daily=()=>{let d=new Date().toISOString().slice(0,10);if(state.daily===d)return alert("Already claimed today.");state.daily=d;state.t+=10;save();earn()};
-function exchange(){$("app").innerHTML=`<h1>Exchange</h1><div class=panel><p>Tix: ${state.t}</p><p>Robux: ${state.r}</p><p>10 Tix = 5 Robux</p><button onclick="convert()">Exchange</button></div>`}
-window.convert=()=>{if(state.t<10)return alert("Not enough Tix.");state.t-=10;state.r+=5;save();exchange()};
+  if (!user) {
+    currentUsername = "";
+    if (currentPage !== "Games" && currentPage !== "Catalog" &&
+        currentPage !== "Servers") {
+      $("page").innerHTML = `
+        <h1>Welcome to BloxGo</h1>
+        <p>Log in to load your account balances.</p>`;
+    }
+    return;
+  }
 
-function servers(){
- let a;try{a=JSON.parse(localStorage.bgServers)||[]}catch{a=[]}
- $("app").innerHTML=`<h1>Servers</h1><div class=panel><input id=sn placeholder="Server name"><input id=su placeholder="Server URL"><button onclick="addServer()">Add Server</button></div><div class=grid>${a.map((x,i)=>`<article class=card><div class=card-body><h3>${esc(x.n)}</h3><p>${esc(x.u)}</p><button onclick="connectServer(${i})">Connect</button><button class=danger onclick="removeServer(${i})">Delete</button></div></article>`).join("")||"<div class=empty>No saved servers.</div>"}</div>`;
-}
-window.addServer=()=>{let a=JSON.parse(localStorage.bgServers||"[]"),n=$("sn").value.trim(),u=$("su").value.trim();if(!n||!u)return alert("Enter a name and URL.");a.push({n,u});localStorage.bgServers=JSON.stringify(a);servers()};
-window.connectServer=i=>{let a=JSON.parse(localStorage.bgServers||"[]");try{let u=new URL(a[i].u);if(!["http:","https:"].includes(u.protocol))throw 0;open(u.href,"_blank","noopener,noreferrer")}catch{alert("Enter a valid web URL.")}};
-window.removeServer=i=>{let a=JSON.parse(localStorage.bgServers||"[]");a.splice(i,1);localStorage.bgServers=JSON.stringify(a);servers()};
-
-function users(){
- $("app").innerHTML=`<h1>Find Users</h1><p class=muted>Search BloxGo usernames.</p><input class=search id=userSearch placeholder="Enter a username"><div id=userResults></div>`;
- $("userSearch").oninput=()=>{
-  clearTimeout(searchTimer);
-  const term=$("userSearch").value.trim().toLowerCase();
-  if(term.length<2){$("userResults").innerHTML="<p class=muted>Enter at least two characters.</p>";return}
-  $("userResults").innerHTML="<p class=muted>Searching...</p>";
-  searchTimer=setTimeout(async()=>{
-   try{
-    const q=query(collection(db,"usernames"),where("usernameLower",">=",term),where("usernameLower","<=",term+"\uf8ff"),orderBy("usernameLower"),limit(20));
-    const snap=await getDocs(q);
-    if(pageName!=="Users"||$("userSearch").value.trim().toLowerCase()!==term)return;
-    $("userResults").innerHTML=snap.empty?"<p class=muted>No users found.</p>":snap.docs.map(d=>`<div class=result><div><b>${esc(d.data().username)}</b><div class=muted> BloxGo user</div></div></div>`).join("");
-   }catch(e){$("userResults").textContent="Search failed. Check your Firestore rules and indexes."}
-  },300);
- };
-}
-function account(){
- $("app").innerHTML=`<h1>Account</h1><div class=panel account-box>${user?`<h2>${esc(username||"Player")}</h2><p class=muted>Signed in to BloxGo.</p><button id=logout class=danger>Log Out</button>`:`<div class=tabs><button id=login>Log In</button><button id=register class=secondary>Create Account</button></div><form id=form><input id=un required minlength=3 maxlength=20 pattern="[A-Za-z0-9_]+" placeholder="Username"><input id=pw type=password required minlength=6 placeholder="Password"><button id=submit>Log In</button></form><p class=status id=status></p><p class=muted>Use 3–20 letters, numbers or underscores.</p>`}</div>`;
- if(user){$("logout").onclick=()=>signOut(auth);return}
- $("login").onclick=()=>{mode="login";$("submit").textContent="Log In"};
- $("register").onclick=()=>{mode="register";$("submit").textContent="Create Account"};
- $("form").onsubmit=async e=>{
-  e.preventDefault();let n=$("un").value.trim(),p=$("pw").value,lower=n.toLowerCase();$("submit").disabled=true;msg("status","Please wait...");
-  try{
-   const em=await emailFor(n);
-   if(mode==="login"){
-    await signInWithEmailAndPassword(auth,em,p);
-   }else{
-    const c=await createUserWithEmailAndPassword(auth,em,p);
-    try{
-     await runTransaction(db,async tx=>{
-      const ur=doc(db,"usernames",lower),pr=doc(db,"users",c.user.uid);
-      if((await tx.get(ur)).exists())throw Error("Username already exists.");
-      tx.set(ur,{uid:c.user.uid,username:n,usernameLower:lower});
-      tx.set(pr,{username:n,usernameLower:lower,createdAt:new Date().toISOString()});
-     });
-     msg("status","Account created.");
-    }catch(err){await c.user.delete();throw err}
-   }
-  }catch(err){
-   const messages={"auth/email-already-in-use":"This username is already registered.","auth/invalid-credential":"Incorrect username or password.","auth/weak-password":"Password is too weak.","auth/too-many-requests":"Too many attempts. Try later.","permission-denied":"Firestore rules do not allow this action."};
-   msg("status",messages[err.code]||err.message||"Something went wrong.");
-  }finally{if($("submit"))$("submit").disabled=false}
- };
-}
-onAuthStateChanged(auth,async u=>{
- user=u;username="";
- if(u){try{let p=await getDoc(doc(db,"users",u.uid));username=p.exists()?p.data().username:"Player"}catch{username="Player"}}
- if(pageName==="Account")account();
+  try {
+    await loadBalances(user);
+    if (currentPage === "Home" || currentPage === "Account") {
+      showPage(currentPage);
+    }
+  } catch (error) {
+    setStatus("Could not load account balance: " + error.message);
+  }
 });
-save();show("Games");loadGames();
+
+showPage("Home");
 </script>
 </body>
 </html>
