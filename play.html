@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>BloxGo Game</title>
+<script type="importmap">
+{"imports":{
+"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
+}}
+</script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#dceafa;font-family:Arial,sans-serif}
+#game{position:fixed;inset:0}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+#title{position:fixed;top:12px;left:14px;background:#ffffffdd;color:#24527d;padding:10px 14px;border-radius:10px;font-weight:bold}
+#status{position:fixed;top:60px;left:14px;color:#345c80;font-size:12px}
+#controls{display:none;position:fixed;bottom:20px;left:15px;right:15px;justify-content:space-between;align-items:end;pointer-events:none}
+#joy{width:116px;height:116px;border:2px solid #6b9fc9;border-radius:50%;background:#ffffff88;position:relative;pointer-events:auto;touch-action:none}
+#stick{position:absolute;width:44px;height:44px;left:34px;top:34px;border-radius:50%;background:#287fca}
+#jump{width:76px;height:76px;border-radius:50%;background:#2585d4;color:white;border:2px solid white;font-weight:bold;pointer-events:auto;touch-action:none}
+@media(pointer:coarse){#controls{display:flex}}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="title">BloxGo</div>
+<div id="status">Loading game...</div>
+<div id="controls">
+<div id="joy"><div id="stick"></div></div>
+<button id="jump">JUMP</button>
+</div>
+
+<script type="module">
+import * as THREE from "three";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import {getFirestore,doc,getDoc}
+from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+const firebaseConfig={
+ apiKey:"AIzaSyBui_UWCNABfF3wBYBMzi6Q5dLGvykfhaM",
+ authDomain:"bloxgo-data.firebaseapp.com",
+ projectId:"bloxgo-data",
+ storageBucket:"bloxgo-data.firebasestorage.app",
+ messagingSenderId:"905482130911",
+ appId:"1:905482130911:web:273e391163a595ca32606a",
+ measurementId:"G-4WYW9MNZ6Z"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+const $=id=>document.getElementById(id);
+const status=$("status");
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0xdceafa);
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,1000);
+camera.position.set(7,7,10);
+
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+$("game").appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x91a9c4,2.1));
+const sun=new THREE.DirectionalLight(0xffffff,2.2);
+sun.position.set(8,15,10);
+sun.castShadow=true;
+scene.add(sun);
+
+function resize(){
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+}
+addEventListener("resize",resize);
+resize();
+
+const player=new THREE.Group();
+function block(w,h,d,color,x,y,z){
+ const mesh=new THREE.Mesh(
+  new THREE.BoxGeometry(w,h,d),
+  new THREE.MeshStandardMaterial({color})
+ );
+ mesh.position.set(x,y,z);
+ mesh.castShadow=true;
+ player.add(mesh);
+}
+block(.9,1.1,.45,0x1686d9,0,1.35,0);
+block(.72,.72,.72,0xffd19a,0,2.25,0);
+block(.34,.85,.38,0x263c60,-.24,.43,0);
+block(.34,.85,.38,0x263c60,.24,.43,0);
+block(.3,.9,.35,0xffd19a,-.62,1.4,0);
+block(.3,.9,.35,0xffd19a,.62,1.4,0);
+player.position.set(0,0,4);
+scene.add(player);
+
+const keys={w:false,a:false,s:false,d:false};
+let joyX=0,joyY=0,velocityY=0,onGround=true;
+let cameraAngle=0,cameraDistance=9;
+let dragging=false,lastX=0,lastY=0;
+
+addEventListener("keydown",e=>{
+ if(e.target.tagName==="INPUT")return;
+ const k=e.key.toLowerCase();
+ if(k in keys){keys[k]=true;e.preventDefault()}
+ if(e.code==="Space"){jump();e.preventDefault()}
+});
+addEventListener("keyup",e=>{
+ const k=e.key.toLowerCase();
+ if(k in keys)keys[k]=false;
+});
+
+function jump(){
+ if(onGround){velocityY=8;onGround=false}
+}
+
+$("jump").addEventListener("pointerdown",e=>{
+ e.preventDefault();jump();
+});
+
+const joy=$("joy"),stick=$("stick");
+let joyPointer=null;
+joy.addEventListener("pointerdown",e=>{
+ joyPointer=e.pointerId;
+ joy.setPointerCapture(e.pointerId);
+ updateJoy(e);
+});
+joy.addEventListener("pointermove",e=>{
+ if(e.pointerId===joyPointer)updateJoy(e);
+});
+function updateJoy(e){
+ const r=joy.getBoundingClientRect();
+ let x=e.clientX-(r.left+r.width/2);
+ let y=e.clientY-(r.top+r.height/2);
+ const max=38,len=Math.hypot(x,y);
+ if(len>max){x=x/len*max;y=y/len*max}
+ joyX=x/max;joyY=y/max;
+ stick.style.transform=`translate(${x}px,${y}px)`;
+}
+function resetJoy(){
+ joyPointer=null;joyX=joyY=0;
+ stick.style.transform="translate(0,0)";
+}
+joy.addEventListener("pointerup",resetJoy);
+joy.addEventListener("pointercancel",resetJoy);
+
+renderer.domElement.addEventListener("pointerdown",e=>{
+ if(e.pointerType==="mouse"||e.pointerType==="touch"){
+  dragging=true;lastX=e.clientX;lastY=e.clientY;
+  renderer.domElement.setPointerCapture(e.pointerId);
+ }
+});
+renderer.domElement.addEventListener("pointermove",e=>{
+ if(!dragging)return;
+ cameraAngle-=(e.clientX-lastX)*.006;
+ cameraDistance=Math.max(5,Math.min(16,cameraDistance+(e.clientY-lastY)*.025));
+ lastX=e.clientX;lastY=e.clientY;
+});
+renderer.domElement.addEventListener("pointerup",()=>dragging=false);
+renderer.domElement.addEventListener("pointercancel",()=>dragging=false);
+
+async function loadGame(){
+ const id=new URLSearchParams(location.search).get("id");
+ if(!id){status.textContent="Missing game ID.";return}
+
+ try{
+  const snap=await getDoc(doc(db,"publishedGames",id));
+  if(!snap.exists()){status.textContent="Game not found.";return}
+  const data=snap.data();
+  $("title").textContent=data.title||"BloxGo Game";
+  document.title=(data.title||"BloxGo Game")+" - BloxGo";
+
+  const loader=new THREE.ObjectLoader();
+  const loaded=loader.parse(data.scene);
+  scene.add(loaded);
+  status.textContent="Playing: "+(data.title||"Game");
+ }catch(e){
+  status.textContent="Could not load game: "+e.message;
+ }
+}
+
+await loadGame();
+
+let last=performance.now();
+function animate(now){
+ requestAnimationFrame(animate);
+ const dt=Math.min((now-last)/1000,.04);last=now;
+
+ const x=(keys.d?1:0)-(keys.a?1:0)+joyX;
+ const z=(keys.s?1:0)-(keys.w?1:0)+joyY;
+ const direction=new THREE.Vector3(x,0,z);
+ if(direction.length()>1)direction.normalize();
+
+ const forward=new THREE.Vector3(
+  Math.sin(cameraAngle),0,Math.cos(cameraAngle)
+ );
+ const right=new THREE.Vector3(
+  Math.cos(cameraAngle),0,-Math.sin(cameraAngle)
+ );
+ const movement=new THREE.Vector3()
+  .addScaledVector(right,direction.x)
+  .addScaledVector(forward,direction.z);
+
+ player.position.addScaledVector(movement,6*dt);
+ if(movement.lengthSq()>.01)player.rotation.y=Math.atan2(movement.x,movement.z);
+
+ velocityY-=20*dt;
+ player.position.y+=velocityY*dt;
+ if(player.position.y<0){
+  player.position.y=0;velocityY=0;onGround=true;
+ }
+
+ const target=new THREE.Vector3(
+  player.position.x-Math.sin(cameraAngle)*cameraDistance,
+  player.position.y+5,
+  player.position.z-Math.cos(cameraAngle)*cameraDistance
+ );
+ camera.position.lerp(target,.12);
+ camera.lookAt(player.position.x,player.position.y+1,player.position.z);
+
+ renderer.render(scene,camera);
+}
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
