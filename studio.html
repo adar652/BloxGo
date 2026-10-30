@@ -5,112 +5,121 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>BloxGo Studio</title>
-
+<script type="importmap">
+{"imports":{
+"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+"three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+}}
+</script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#080f1d;color:#eaf3ff;font-family:Arial,sans-serif;overflow:hidden}
+body{margin:0;background:#edf4fc;color:#193451;font-family:Arial,sans-serif;overflow:hidden}
 button,input{font:inherit}
-button{background:#172b46;color:#eaf3ff;border:1px solid #29476d;border-radius:7px;padding:9px 12px;cursor:pointer}
-button:hover{background:#245080}
-button.active{background:#176fc2;border-color:#48aaff}
+button{border:1px solid #c6d9ee;background:#fff;color:#23476d;border-radius:8px;padding:9px 12px;cursor:pointer}
+button:hover{background:#e2f0ff}
+button.active{background:#d7ebff;border-color:#459ce8;color:#1264a9}
 #app{height:100dvh;display:flex;flex-direction:column}
-#topbar{height:52px;flex-shrink:0;background:#101e33;border-bottom:1px solid #29415e;display:flex;align-items:center;gap:7px;padding:0 10px;overflow-x:auto}
-#brand{font-size:17px;font-weight:bold;color:#60b4ff;margin-right:12px;white-space:nowrap}
+#topbar{height:54px;flex-shrink:0;background:#fff;border-bottom:1px solid #cbdced;display:flex;align-items:center;gap:6px;padding:0 10px;overflow-x:auto}
+#brand{font-weight:800;font-size:17px;color:#1477c9;white-space:nowrap;margin-right:10px}
 #main{flex:1;min-height:0;display:flex}
-#left,#right{width:210px;flex-shrink:0;background:#101d30;border-color:#263e5c;display:flex;flex-direction:column;overflow:auto}
-#left{border-right:1px solid #263e5c}
-#right{border-left:1px solid #263e5c}
-.panel-title{padding:12px;font-weight:bold;border-bottom:1px solid #263e5c;color:#8fcaff}
-.panel-content{padding:10px;display:flex;flex-direction:column;gap:8px}
-#viewport{flex:1;min-width:0;position:relative;background:#101b2b;overflow:hidden}
+aside{width:190px;flex-shrink:0;background:#fff;overflow:auto}
+#left{border-right:1px solid #cbdced}
+#right{border-left:1px solid #cbdced}
+.panel-title{font-weight:bold;padding:12px;border-bottom:1px solid #d8e5f2;color:#2878b9}
+.panel-content{padding:9px;display:flex;flex-direction:column;gap:7px}
+.section{font-size:11px;color:#7392b2;text-transform:uppercase;margin:8px 0 2px}
+#viewport{flex:1;min-width:0;position:relative;background:#dceafa;overflow:hidden}
 #viewport canvas{display:block;width:100%;height:100%;touch-action:none}
-#viewport-label{position:absolute;top:10px;left:12px;color:#8ca9ca;font-size:12px;pointer-events:none}
-#bottom{height:105px;flex-shrink:0;background:#0c1728;border-top:1px solid #263e5c;overflow:auto}
-#output{padding:10px;color:#9db7d7;font-size:12px;white-space:pre-wrap}
-.section{font-size:11px;color:#7fa8d5;text-transform:uppercase;margin:8px 0 3px}
-.item{padding:8px;border-radius:6px;background:#172b45;border:1px solid transparent;cursor:pointer;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.item.selected{background:#174d7b;border-color:#58aaff}
-.prop{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#a9c4e4}
-.prop input{width:100%;background:#091526;color:white;border:1px solid #29476d;border-radius:5px;padding:7px;min-width:0}
+#viewport-label{position:absolute;top:10px;left:12px;color:#47759f;font-size:12px;pointer-events:none}
+.item{padding:8px;border-radius:7px;background:#f0f6fc;border:1px solid transparent;cursor:pointer;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item.selected{background:#d8edff;border-color:#65a9e8}
+#bottom{height:76px;flex-shrink:0;background:#fff;border-top:1px solid #cbdced;overflow:auto}
+#output{padding:9px;color:#55728f;font-size:12px;white-space:pre-wrap}
+.prop{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#53718f}
+.prop input{width:100%;background:#f7fbff;color:#193451;border:1px solid #c6d9ee;border-radius:5px;padding:7px;min-width:0}
 .xyz{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
-.small{font-size:11px;color:#819bb9}
+.xyz input{width:100%;min-width:0}
+.small{font-size:11px;color:#7b95ae}
 #fileInput{display:none}
+#mobileControls{display:none;position:absolute;bottom:20px;left:15px;right:15px;justify-content:space-between;align-items:end;pointer-events:none}
+#joystick{width:116px;height:116px;border-radius:50%;background:#ffffff88;border:2px solid #6b9fc9;position:relative;pointer-events:auto;touch-action:none}
+#stick{position:absolute;width:44px;height:44px;border-radius:50%;background:#287fca;left:34px;top:34px;box-shadow:0 2px 8px #3458}
+#jump{width:76px;height:76px;border-radius:50%;background:#2585d4;color:white;border:2px solid white;font-weight:bold;pointer-events:auto;touch-action:none}
+#publishName{width:145px;min-width:100px;padding:8px;border:1px solid #c6d9ee;border-radius:8px}
+#playBadge{position:absolute;top:10px;right:10px;background:#2585d4;color:white;border-radius:8px;padding:7px 10px;font-size:12px;display:none}
 @media(max-width:700px){
- #left{width:105px}
+ aside{width:125px}
  #right{width:145px}
  .panel-content{padding:6px}
  button{padding:8px;font-size:12px}
  #brand{font-size:14px}
  #topbar{gap:4px}
- .item{font-size:11px;padding:7px 4px}
+ #publishName{width:110px}
 }
-@media(max-width:420px){
- #left{width:85px}
- #right{width:125px}
+@media(max-width:430px){
+ aside{width:92px}
+ #right{width:118px}
+ .item{font-size:10px;padding:6px 3px}
+}
+@media(pointer:coarse){
+ #mobileControls.visible{display:flex}
 }
 </style>
-
-<script type="importmap">
-{
- "imports":{
-  "three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
-  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
- }
-}
-</script>
 </head>
-
 <body>
 <div id="app">
-
 <header id="topbar">
- <div id="brand">BloxGo Studio</div>
- <button id="addPart">Part</button>
- <button id="addSphere">Sphere</button>
- <button id="addCylinder">Cylinder</button>
- <button id="importObj">Import OBJ</button>
- <button id="move" class="active">Move</button>
- <button id="rotate">Rotate</button>
- <button id="scale">Scale</button>
- <button id="play">Play</button>
- <button id="stop">Stop</button>
- <button id="save">Save</button>
- <input id="fileInput" type="file" accept=".obj">
+<div id="brand">BloxGo Studio</div>
+<button id="addPart">Part</button>
+<button id="addSphere">Sphere</button>
+<button id="addCylinder">Cylinder</button>
+<button id="importObj">Import OBJ</button>
+<button id="move" class="active">Move</button>
+<button id="rotate">Rotate</button>
+<button id="scale">Scale</button>
+<button id="play">Play Test</button>
+<button id="stop">Stop</button>
+<input id="publishName" placeholder="Game name" value="My Game">
+<button id="publish">Publish</button>
+<input id="fileInput" type="file" accept=".obj">
 </header>
 
 <div id="main">
-
 <aside id="left">
- <div class="panel-title">Toolbox</div>
- <div class="panel-content">
-  <div class="section">Create</div>
-  <button id="toolPart">Part</button>
-  <button id="toolSphere">Sphere</button>
-  <button id="toolCylinder">Cylinder</button>
-  <div class="section">Import</div>
-  <button id="toolObj">OBJ Model</button>
-  <p class="small">Import 3D models from your device.</p>
- </div>
+<div class="panel-title">Toolbox</div>
+<div class="panel-content">
+<div class="section">Create</div>
+<button id="toolPart">Part</button>
+<button id="toolSphere">Sphere</button>
+<button id="toolCylinder">Cylinder</button>
+<div class="section">Import</div>
+<button id="toolObj">OBJ Model</button>
+<p class="small">Add 3D objects to your world.</p>
+</div>
 </aside>
 
 <section id="viewport">
- <div id="viewport-label">3D Workspace</div>
+<div id="viewport-label">3D Workspace</div>
+<div id="playBadge">PLAY TEST</div>
+<div id="mobileControls">
+<div id="joystick"><div id="stick"></div></div>
+<button id="jump">JUMP</button>
+</div>
 </section>
 
 <aside id="right">
- <div class="panel-title">Explorer</div>
- <div class="panel-content" id="explorer"></div>
- <div class="panel-title">Properties</div>
- <div class="panel-content" id="properties">
-  <p class="small">Select an object to edit its properties.</p>
- </div>
+<div class="panel-title">Explorer</div>
+<div class="panel-content" id="explorer"></div>
+<div class="panel-title">Properties</div>
+<div class="panel-content" id="properties">
+<p class="small">Select an object.</p>
+</div>
 </aside>
-
 </div>
 
 <footer id="bottom">
- <div class="panel-title">Output</div>
- <div id="output">BloxGo Studio 0.1 ready.</div>
+<div class="panel-title">Output</div>
+<div id="output">BloxGo Studio ready.</div>
 </footer>
 </div>
 
@@ -119,74 +128,75 @@ import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 import {TransformControls} from "three/addons/controls/TransformControls.js";
 import {OBJLoader} from "three/addons/loaders/OBJLoader.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import {getAuth} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+import {getFirestore,doc,setDoc,serverTimestamp}
+from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
+const firebaseConfig={
+ apiKey:"AIzaSyBui_UWCNABfF3wBYBMzi6Q5dLGvykfhaM",
+ authDomain:"bloxgo-data.firebaseapp.com",
+ projectId:"bloxgo-data",
+ storageBucket:"bloxgo-data.firebasestorage.app",
+ messagingSenderId:"905482130911",
+ appId:"1:905482130911:web:273e391163a595ca32606a",
+ measurementId:"G-4WYW9MNZ6Z"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
 const $=id=>document.getElementById(id);
 const viewport=$("viewport");
 const output=$("output");
 const objects=[];
-let selected=null;
-let playing=false;
+let selected=null,playing=false,player=null;
+let velocityY=0,onGround=true;
+const keys={w:false,a:false,s:false,d:false};
+let joy={x:0,y:0,active:false};
 
-function log(message){
- output.textContent=message+"\n"+output.textContent;
-}
+function log(t){output.textContent=t+"\n"+output.textContent}
 
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x101b2b);
+scene.background=new THREE.Color(0xdceafa);
 
-const camera=new THREE.PerspectiveCamera(
- 60,1,0.1,1000
-);
-camera.position.set(9,8,12);
+const camera=new THREE.PerspectiveCamera(60,1,.1,1000);
+camera.position.set(10,9,12);
 
-const renderer=new THREE.WebGLRenderer({
- antialias:true,
- alpha:false
-});
+const renderer=new THREE.WebGLRenderer({antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.shadowMap.enabled=true;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
 viewport.appendChild(renderer.domElement);
 
 const orbit=new OrbitControls(camera,renderer.domElement);
 orbit.enableDamping=true;
 orbit.target.set(0,1,0);
 
-scene.add(new THREE.HemisphereLight(0xb9dcff,0x26344b,2));
-
-const sun=new THREE.DirectionalLight(0xffffff,2);
+scene.add(new THREE.HemisphereLight(0xffffff,0x91a9c4,2.1));
+const sun=new THREE.DirectionalLight(0xffffff,2.2);
 sun.position.set(8,15,10);
 sun.castShadow=true;
 scene.add(sun);
 
-const grid=new THREE.GridHelper(100,100,0x3975a8,0x243a56);
+const grid=new THREE.GridHelper(100,100,0x8bb8df,0xb7cee5);
 scene.add(grid);
 
 const floor=new THREE.Mesh(
  new THREE.PlaneGeometry(100,100),
- new THREE.MeshStandardMaterial({
-  color:0x17283d,
-  roughness:1
- })
+ new THREE.MeshStandardMaterial({color:0xeaf2fa,roughness:1})
 );
 floor.rotation.x=-Math.PI/2;
-floor.position.y=-0.03;
+floor.position.y=-.05;
 floor.receiveShadow=true;
 scene.add(floor);
 
 const transform=new TransformControls(camera,renderer.domElement);
 scene.add(transform.getHelper());
-
-transform.addEventListener("dragging-changed",event=>{
- orbit.enabled=!event.value;
-});
-
-transform.addEventListener("objectChange",()=>{
- updateProperties();
-});
+transform.addEventListener("dragging-changed",e=>orbit.enabled=!e.value);
 
 function resize(){
- const w=viewport.clientWidth;
- const h=viewport.clientHeight;
+ const w=viewport.clientWidth,h=viewport.clientHeight;
  if(!w||!h)return;
  camera.aspect=w/h;
  camera.updateProjectionMatrix();
@@ -200,13 +210,9 @@ function addObject(type){
  if(type==="Part")geometry=new THREE.BoxGeometry(2,2,2);
  if(type==="Sphere")geometry=new THREE.SphereGeometry(1,32,24);
  if(type==="Cylinder")geometry=new THREE.CylinderGeometry(1,1,2,32);
-
- const material=new THREE.MeshStandardMaterial({
-  color:0x398bd5,
-  roughness:0.65
- });
-
- const mesh=new THREE.Mesh(geometry,material);
+ const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({
+  color:0x55a7e8,roughness:.65
+ }));
  mesh.name=type+" "+(objects.length+1);
  mesh.position.set(0,1,0);
  mesh.castShadow=true;
@@ -214,279 +220,321 @@ function addObject(type){
  scene.add(mesh);
  objects.push(mesh);
  selectObject(mesh);
- refreshExplorer();
  log(type+" created.");
 }
 
 function importOBJ(file){
  if(!file)return;
  const reader=new FileReader();
-
  reader.onload=()=>{
   try{
-   const loader=new OBJLoader();
-   const object=loader.parse(reader.result);
-   object.name=file.name.replace(/\.obj$/i,"");
-   object.traverse(child=>{
-    if(child.isMesh){
-     child.material=new THREE.MeshStandardMaterial({
-      color:0xb4c9df,
-      roughness:0.8
-     });
-     child.castShadow=true;
-     child.receiveShadow=true;
+   const obj=new OBJLoader().parse(reader.result);
+   obj.name=file.name.replace(/\.obj$/i,"");
+   obj.traverse(c=>{
+    if(c.isMesh){
+     c.material=new THREE.MeshStandardMaterial({color:0xa9c7df});
+     c.castShadow=true;
+     c.receiveShadow=true;
     }
    });
-   object.position.set(0,0,0);
-   scene.add(object);
-   objects.push(object);
-   selectObject(object);
-   refreshExplorer();
-   log("Imported OBJ: "+file.name);
-  }catch(error){
-   log("OBJ import failed: "+error.message);
-  }
+   obj.position.set(0,0,0);
+   scene.add(obj);
+   objects.push(obj);
+   selectObject(obj);
+   log("Imported "+file.name);
+  }catch(e){log("OBJ error: "+e.message)}
  };
  reader.readAsText(file);
 }
 
-function selectObject(object){
- selected=object;
+function selectObject(o){
+ selected=o;
  transform.detach();
-
- if(selected&&!playing){
-  transform.attach(selected);
- }
+ if(o&&!playing)transform.attach(o);
  refreshExplorer();
  updateProperties();
 }
 
 function refreshExplorer(){
- const list=$("explorer");
- list.innerHTML="";
-
+ const box=$("explorer");
+ box.innerHTML="";
  const world=document.createElement("div");
  world.className="item";
  world.textContent="World";
- list.appendChild(world);
-
- objects.forEach(object=>{
-  const item=document.createElement("div");
-  item.className="item"+(object===selected?" selected":"");
-  item.textContent="▰ "+object.name;
-  item.onclick=()=>selectObject(object);
-  list.appendChild(item);
+ box.appendChild(world);
+ objects.forEach(o=>{
+  const el=document.createElement("div");
+  el.className="item"+(o===selected?" selected":"");
+  el.textContent="▰ "+o.name;
+  el.onclick=()=>selectObject(o);
+  box.appendChild(el);
  });
-}
-
-function field(label,axis,value,onChange){
- const wrapper=document.createElement("label");
- wrapper.className="prop";
- wrapper.textContent=label;
-
- const input=document.createElement("input");
- input.type="number";
- input.step="0.1";
- input.value=Number(value).toFixed(2);
- input.onchange=()=>{
-  const n=Number(input.value);
-  if(Number.isFinite(n))onChange(n);
- };
-
- wrapper.appendChild(input);
- return wrapper;
 }
 
 function updateProperties(){
  const panel=$("properties");
  panel.innerHTML="";
-
  if(!selected){
-  panel.innerHTML='<p class="small">Select an object to edit its properties.</p>';
+  panel.innerHTML='<p class="small">Select an object.</p>';
   return;
  }
+ const name=document.createElement("input");
+ name.value=selected.name;
+ name.onchange=()=>{selected.name=name.value;refreshExplorer()};
+ const label=document.createElement("label");
+ label.className="prop";
+ label.textContent="Name";
+ label.appendChild(name);
+ panel.appendChild(label);
 
- const nameLabel=document.createElement("label");
- nameLabel.className="prop";
- nameLabel.textContent="Name";
- const nameInput=document.createElement("input");
- nameInput.value=selected.name;
- nameInput.onchange=()=>{
-  selected.name=nameInput.value;
-  refreshExplorer();
- };
- nameLabel.appendChild(nameInput);
- panel.appendChild(nameLabel);
-
- function vectorSection(title,vector,callback){
+ function vector(title,v,fn,rotation=false){
   const heading=document.createElement("div");
   heading.className="section";
   heading.textContent=title;
   panel.appendChild(heading);
-
   const row=document.createElement("div");
   row.className="xyz";
-  ["X","Y","Z"].forEach((axis,index)=>{
+  ["X","Y","Z"].forEach((axis,i)=>{
    const input=document.createElement("input");
-   input.type="number";
-   input.step="0.1";
-   input.value=vector.getComponent(index).toFixed(2);
+   input.type="number";input.step=".1";
+   input.value=(rotation?THREE.MathUtils.radToDeg(v.getComponent(i)):v.getComponent(i)).toFixed(1);
    input.title=axis;
    input.onchange=()=>{
-    const value=Number(input.value);
-    if(Number.isFinite(value)){
-     vector.setComponent(index,value);
-     callback();
-    }
+    const n=Number(input.value);
+    if(!Number.isFinite(n))return;
+    v.setComponent(i,rotation?THREE.MathUtils.degToRad(n):n);
    };
    row.appendChild(input);
   });
   panel.appendChild(row);
  }
+ vector("Position",selected.position,()=>{});
+ vector("Rotation",selected.rotation,()=>{},true);
+ vector("Scale",selected.scale,()=>{});
 
- vectorSection("Position",selected.position,()=>{
-  selected.updateMatrixWorld();
- });
-
- vectorSection("Rotation",selected.rotation,()=>{
-  selected.rotation.set(
-   THREE.MathUtils.degToRad(selected.rotation.x*180/Math.PI),
-   THREE.MathUtils.degToRad(selected.rotation.y*180/Math.PI),
-   THREE.MathUtils.degToRad(selected.rotation.z*180/Math.PI)
-  );
- });
-
- vectorSection("Scale",selected.scale,()=>{});
-
- const remove=document.createElement("button");
- remove.textContent="Delete Object";
- remove.onclick=deleteSelected;
- panel.appendChild(remove);
-
- const duplicate=document.createElement("button");
- duplicate.textContent="Duplicate Object";
- duplicate.onclick=duplicateSelected;
- panel.appendChild(duplicate);
+ const del=document.createElement("button");
+ del.textContent="Delete";
+ del.onclick=deleteSelected;
+ panel.appendChild(del);
+ const dup=document.createElement("button");
+ dup.textContent="Duplicate";
+ dup.onclick=duplicateSelected;
+ panel.appendChild(dup);
 }
 
 function deleteSelected(){
  if(!selected)return;
- transform.detach();
  scene.remove(selected);
- const index=objects.indexOf(selected);
- if(index>=0)objects.splice(index,1);
- selected=null;
- refreshExplorer();
- updateProperties();
- log("Object deleted.");
+ const i=objects.indexOf(selected);
+ if(i>=0)objects.splice(i,1);
+ transform.detach();selected=null;
+ refreshExplorer();updateProperties();log("Object deleted.");
 }
-
 function duplicateSelected(){
  if(!selected)return;
  const copy=selected.clone(true);
  copy.name=selected.name+" Copy";
  copy.position.x+=2;
- scene.add(copy);
- objects.push(copy);
+ scene.add(copy);objects.push(copy);
  selectObject(copy);
- log("Object duplicated.");
 }
-
-function setMode(mode){
- transform.setMode(mode);
+function setMode(m){
+ transform.setMode(m);
  ["move","rotate","scale"].forEach(id=>{
-  $(id).classList.toggle("active",id===mode);
+  $(id).classList.toggle("active",
+   id===(m==="translate"?"move":m));
  });
 }
 
 $("addPart").onclick=$("toolPart").onclick=()=>addObject("Part");
 $("addSphere").onclick=$("toolSphere").onclick=()=>addObject("Sphere");
 $("addCylinder").onclick=$("toolCylinder").onclick=()=>addObject("Cylinder");
-
 $("importObj").onclick=$("toolObj").onclick=()=>$("fileInput").click();
-$("fileInput").onchange=event=>{
- importOBJ(event.target.files[0]);
- event.target.value="";
-};
-
+$("fileInput").onchange=e=>{importOBJ(e.target.files[0]);e.target.value=""};
 $("move").onclick=()=>setMode("translate");
 $("rotate").onclick=()=>setMode("rotate");
 $("scale").onclick=()=>setMode("scale");
 
 const raycaster=new THREE.Raycaster();
 const pointer=new THREE.Vector2();
-
-renderer.domElement.addEventListener("pointerdown",event=>{
- if(transform.dragging)return;
-
- const rect=renderer.domElement.getBoundingClientRect();
- pointer.x=((event.clientX-rect.left)/rect.width)*2-1;
- pointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
-
+renderer.domElement.addEventListener("pointerdown",e=>{
+ if(playing||transform.dragging)return;
+ const r=renderer.domElement.getBoundingClientRect();
+ pointer.x=((e.clientX-r.left)/r.width)*2-1;
+ pointer.y=-((e.clientY-r.top)/r.height)*2+1;
  raycaster.setFromCamera(pointer,camera);
  const hits=raycaster.intersectObjects(objects,true);
-
  if(hits.length){
-  let object=hits[0].object;
-  while(object.parent&&object.parent!==scene){
-   object=object.parent;
-  }
-  if(objects.includes(object)){
-   selectObject(object);
-  }
- }else{
-  selectObject(null);
- }
+  let o=hits[0].object;
+  while(o.parent&&o.parent!==scene)o=o.parent;
+  if(objects.includes(o))selectObject(o);
+ }else selectObject(null);
 });
 
-$("play").onclick=()=>{
+function makePlayer(){
+ const group=new THREE.Group();
+ const mat=(color)=>new THREE.MeshStandardMaterial({color});
+ const body=new THREE.Mesh(new THREE.BoxGeometry(.9,1.1,.45),mat(0x1686d9));
+ body.position.y=1.35;
+ const head=new THREE.Mesh(new THREE.BoxGeometry(.72,.72,.72),mat(0xffd19a));
+ head.position.y=2.25;
+ const legMat=mat(0x263c60);
+ const leftLeg=new THREE.Mesh(new THREE.BoxGeometry(.34,.85,.38),legMat);
+ const rightLeg=leftLeg.clone();
+ leftLeg.position.set(-.24,.43,0);
+ rightLeg.position.set(.24,.43,0);
+ const armMat=mat(0xffd19a);
+ const leftArm=new THREE.Mesh(new THREE.BoxGeometry(.3,.9,.35),armMat);
+ const rightArm=leftArm.clone();
+ leftArm.position.set(-.62,1.4,0);
+ rightArm.position.set(.62,1.4,0);
+ [body,head,leftLeg,rightLeg,leftArm,rightArm].forEach(m=>{
+  m.castShadow=true;group.add(m);
+ });
+ group.name="Player";
+ group.position.set(0,0,4);
+ scene.add(group);
+ return group;
+}
+
+function startPlay(){
  if(playing)return;
  playing=true;
  transform.detach();
- orbit.enabled=true;
- log("Play mode started.");
-};
-
-$("stop").onclick=()=>{
+ orbit.enabled=false;
+ player=makePlayer();
+ velocityY=0;
+ $("playBadge").style.display="block";
+ $("mobileControls").classList.add("visible");
+ log("Play Test started. Desktop: WASD + Space. Mobile: joystick + jump.");
+}
+function stopPlay(){
  if(!playing)return;
  playing=false;
+ if(player)scene.remove(player);
+ player=null;
+ orbit.enabled=true;
  if(selected)transform.attach(selected);
- log("Play mode stopped.");
-};
+ $("playBadge").style.display="none";
+ $("mobileControls").classList.remove("visible");
+ Object.keys(keys).forEach(k=>keys[k]=false);
+ joy.x=joy.y=0;
+ $("stick").style.transform="translate(0,0)";
+ log("Play Test stopped.");
+}
+$("play").onclick=startPlay;
+$("stop").onclick=stopPlay;
 
-$("save").onclick=()=>{
- const data=scene.toJSON();
- const blob=new Blob(
-  [JSON.stringify(data,null,2)],
-  {type:"application/json"}
- );
- const url=URL.createObjectURL(blob);
- const a=document.createElement("a");
- a.href=url;
- a.download="BloxGo-Project.json";
- a.click();
- URL.revokeObjectURL(url);
- log("Project JSON exported.");
-};
-
-window.addEventListener("keydown",event=>{
- if(event.target instanceof HTMLInputElement)return;
- if(event.key==="Delete"||event.key==="Backspace")deleteSelected();
- if(event.key==="w")setMode("translate");
- if(event.key==="e")setMode("rotate");
- if(event.key==="r")setMode("scale");
+window.addEventListener("keydown",e=>{
+ if(["INPUT"].includes(document.activeElement.tagName))return;
+ const k=e.key.toLowerCase();
+ if(k==="w"||k==="a"||k==="s"||k==="d"){
+  keys[k]=true;e.preventDefault();
+ }
+ if(e.code==="Space"&&playing){jump();e.preventDefault()}
+});
+window.addEventListener("keyup",e=>{
+ const k=e.key.toLowerCase();
+ if(k in keys)keys[k]=false;
 });
 
-function animate(){
+function jump(){
+ if(playing&&onGround){velocityY=8;onGround=false}
+}
+
+const joyBase=$("joystick"),stick=$("stick");
+joyBase.addEventListener("pointerdown",e=>{
+ joy.active=true;joyBase.setPointerCapture(e.pointerId);moveJoy(e);
+});
+joyBase.addEventListener("pointermove",e=>{if(joy.active)moveJoy(e)});
+function moveJoy(e){
+ const r=joyBase.getBoundingClientRect();
+ let x=e.clientX-(r.left+r.width/2);
+ let y=e.clientY-(r.top+r.height/2);
+ const max=38,len=Math.hypot(x,y);
+ if(len>max){x=x/len*max;y=y/len*max}
+ joy.x=x/max;joy.y=y/max;
+ stick.style.transform=`translate(${x}px,${y}px)`;
+}
+function releaseJoy(){
+ joy.active=false;joy.x=joy.y=0;
+ stick.style.transform="translate(0,0)";
+}
+joyBase.addEventListener("pointerup",releaseJoy);
+joyBase.addEventListener("pointercancel",releaseJoy);
+$("jump").addEventListener("pointerdown",e=>{e.preventDefault();jump()});
+
+let last=performance.now();
+function animate(now){
  requestAnimationFrame(animate);
- orbit.update();
+ const dt=Math.min((now-last)/1000,.04);last=now;
+
+ if(playing&&player){
+  const x=(keys.d?1:0)-(keys.a?1:0)+joy.x;
+  const z=(keys.s?1:0)-(keys.w?1:0)+joy.y;
+  const direction=new THREE.Vector3(x,0,z);
+  if(direction.length()>1)direction.normalize();
+  player.position.x+=direction.x*6*dt;
+  player.position.z+=direction.z*6*dt;
+  if(direction.lengthSq()>.01)player.rotation.y=Math.atan2(direction.x,direction.z);
+  velocityY-=20*dt;
+  player.position.y+=velocityY*dt;
+  if(player.position.y<=0){player.position.y=0;velocityY=0;onGround=true}
+  const target=new THREE.Vector3(player.position.x+7,player.position.y+6,player.position.z+9);
+  camera.position.lerp(target,.09);
+  camera.lookAt(player.position.x,player.position.y+1,player.position.z);
+ }else{
+  orbit.update();
+ }
  renderer.render(scene,camera);
 }
-animate();
+requestAnimationFrame(animate);
+
+function makeGameId(){
+ return "bg-"+crypto.randomUUID().replaceAll("-","").slice(0,18);
+}
+
+$("publish").onclick=async()=>{
+ if(playing){log("Stop Play Test before publishing.");return}
+ const user=auth.currentUser;
+ if(!user){log("Log in to your BloxGo account before publishing.");return}
+ const title=$("publishName").value.trim();
+ if(!title){log("Enter a game name first.");return}
+
+ const button=$("publish");
+ button.disabled=true;
+ button.textContent="Publishing...";
+ try{
+  const id=makeGameId();
+  const project=scene.toJSON();
+  await setDoc(doc(db,"publishedGames",id),{
+   title,
+   ownerUid:user.uid,
+   scene:project,
+   createdAt:serverTimestamp(),
+   updatedAt:serverTimestamp(),
+   version:1
+  });
+  const url=new URL("play.html",location.href);
+  url.searchParams.set("id",id);
+  await navigator.clipboard?.writeText(url.href).catch(()=>{});
+  log("Published successfully: "+url.href);
+  alert("Game published!\n\n"+url.href+"\n\nThe link was copied if clipboard access was available.");
+ }catch(e){
+  log("Publish failed: "+e.message);
+  alert("Publish failed: "+e.message);
+ }finally{
+  button.disabled=false;
+  button.textContent="Publish";
+ }
+};
+
+window.addEventListener("keydown",e=>{
+ if(e.key==="Delete"&&!playing&&document.activeElement.tagName!=="INPUT")deleteSelected();
+});
 
 addObject("Part");
-log("Workspace initialized.");
+log("BloxGo Studio 0.1 loaded.");
 </script>
 </body>
-  </html>
-
+</html>
