@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,7 +39,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#eaf4ff;fon
  background:#2378e8;color:white;border:0;
  font-weight:bold;pointer-events:auto;touch-action:none
 }
-@media(pointer:coarse){
+@media(pointer:coarse) and (hover:none){
  #mobileControls{display:flex}
 }
 @media(pointer:fine){
@@ -72,12 +73,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#eaf4ff;fon
 <script type="module">
 
 import * as THREE from "three";
-
-import {OrbitControls}
-from "three/addons/controls/OrbitControls.js";
-
-import {OBJLoader}
-from "three/addons/loaders/OBJLoader.js";
+import {OBJLoader} from "three/addons/loaders/OBJLoader.js";
 
 import {
  initializeApp
@@ -109,7 +105,7 @@ const db=getFirestore(firebaseApp);
 /* MENU */
 
 document.getElementById("bloxgoMenuButton").onclick=()=>{
- window.location.href="index.html";
+ location.href="index.html";
 };
 
 
@@ -123,8 +119,9 @@ const renderer=new THREE.WebGLRenderer({
 });
 
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
 
-const scene=new THREE.Scene();
+let scene=new THREE.Scene();
 scene.background=new THREE.Color(0xeaf4ff);
 
 const camera=new THREE.PerspectiveCamera(
@@ -132,10 +129,6 @@ const camera=new THREE.PerspectiveCamera(
 );
 
 camera.position.set(7,6,9);
-
-const orbit=new OrbitControls(camera,canvas);
-orbit.enableDamping=true;
-orbit.enabled=false;
 
 scene.add(new THREE.HemisphereLight(
  0xffffff,0x9bb6d4,2
@@ -146,25 +139,68 @@ const sunlight=new THREE.DirectionalLight(
 );
 
 sunlight.position.set(8,15,8);
+sunlight.castShadow=true;
 scene.add(sunlight);
 
 
-/* FLOOR */
+/* DEFAULT FLOOR */
 
-const floor=new THREE.Mesh(
- new THREE.PlaneGeometry(1000,1000),
- new THREE.MeshStandardMaterial({color:0xf7fbff})
-);
+function createDefaultFloor(){
 
-floor.rotation.x=-Math.PI/2;
-floor.position.y=-.05;
-scene.add(floor);
+ const floor=new THREE.Mesh(
+  new THREE.PlaneGeometry(1000,1000),
+  new THREE.MeshStandardMaterial({color:0xf7fbff})
+ );
+
+ floor.rotation.x=-Math.PI/2;
+ floor.position.y=-.05;
+ floor.name="BloxGoDefaultFloor";
+ floor.receiveShadow=true;
+
+ scene.add(floor);
+
+}
+
+createDefaultFloor();
 
 
-/* LOAD PUBLISHED GAME */
+/* GAME LOADING */
 
 const params=new URLSearchParams(location.search);
 const gameId=params.get("id");
+
+let collisionObjects=[];
+
+function rebuildCollisionObjects(){
+
+ collisionObjects=[];
+
+ scene.updateMatrixWorld(true);
+
+ scene.traverse(object=>{
+
+  if(!object.isMesh || !object.visible)return;
+
+  if(object.name==="BloxGoDefaultFloor")return;
+
+  const bounds=new THREE.Box3().setFromObject(object);
+
+  if(bounds.isEmpty())return;
+
+  const size=new THREE.Vector3();
+  bounds.getSize(size);
+
+  // Large floor-like objects are not wall colliders.
+  if(size.x>200 || size.z>200)return;
+
+  collisionObjects.push({
+   object,
+   bounds
+  });
+
+ });
+
+}
 
 async function loadGame(){
 
@@ -188,14 +224,37 @@ async function loadGame(){
    const loader=new THREE.ObjectLoader();
    const loadedScene=loader.parse(data.scene);
 
-   loadedScene.traverse(object=>{
+   // Replace the default world with the published world.
+   scene=loadedScene;
+
+   scene.traverse(object=>{
+
     if(object.isMesh){
      object.castShadow=true;
      object.receiveShadow=true;
     }
+
    });
 
-   scene.add(loadedScene);
+   let hasLight=false;
+
+   scene.traverse(object=>{
+    if(object.isLight)hasLight=true;
+   });
+
+   if(!hasLight){
+
+    scene.add(new THREE.HemisphereLight(
+     0xffffff,0x9bb6d4,2
+    ));
+
+    const light=new THREE.DirectionalLight(0xffffff,2);
+    light.position.set(8,15,8);
+    scene.add(light);
+
+   }
+
+   rebuildCollisionObjects();
 
   }
 
@@ -210,13 +269,17 @@ async function loadGame(){
 }
 
 
-/* PLAYER: NOOB OBJ */
+/* PLAYER */
 
 let player=null;
 let leftArm=null;
 let rightArm=null;
 let leftLeg=null;
 let rightLeg=null;
+
+const playerHeight=3.3;
+const hitboxWidth=1.8;
+const hitboxDepth=1.8;
 
 async function loadNoob(){
 
@@ -258,8 +321,22 @@ async function loadNoob(){
 
   });
 
+  // Normalize the model to approximately 3 world units tall.
   player.scale.setScalar(1);
-  player.position.set(0,0,3);
+
+  let bounds=new THREE.Box3().setFromObject(player);
+  let size=new THREE.Vector3();
+  bounds.getSize(size);
+
+  if(size.y>0){
+
+   player.scale.setScalar(playerHeight/size.y);
+
+  }
+
+  bounds.setFromObject(player);
+
+  player.position.set(0,-bounds.min.y,3);
 
   scene.add(player);
 
@@ -272,23 +349,35 @@ async function loadNoob(){
 }
 
 
-/* CONTROLS */
+/* INPUT */
 
 const keys={};
 
 window.addEventListener("keydown",event=>{
+
  const key=event.key.toLowerCase();
 
  if(["w","a","s","d"," "].includes(key)){
+
   keys[key]=true;
+
   if(key===" ")event.preventDefault();
+
  }
+
 });
 
 window.addEventListener("keyup",event=>{
  keys[event.key.toLowerCase()]=false;
 });
 
+window.addEventListener("blur",()=>{
+ Object.keys(keys).forEach(key=>keys[key]=false);
+ jumpPressed=false;
+});
+
+
+/* MOBILE JOYSTICK */
 
 let joyX=0;
 let joyY=0;
@@ -298,14 +387,18 @@ const stick=document.getElementById("stick");
 const nub=document.getElementById("nub");
 
 stick.addEventListener("pointerdown",event=>{
+
  stick.setPointerCapture(event.pointerId);
  moveStick(event);
+
 });
 
 stick.addEventListener("pointermove",event=>{
+
  if(stick.hasPointerCapture(event.pointerId)){
   moveStick(event);
  }
+
 });
 
 function moveStick(event){
@@ -342,7 +435,8 @@ stick.addEventListener("pointercancel",resetStick);
 
 const jumpButton=document.getElementById("jump");
 
-jumpButton.addEventListener("pointerdown",()=>{
+jumpButton.addEventListener("pointerdown",event=>{
+ event.preventDefault();
  jumpPressed=true;
 });
 
@@ -355,7 +449,92 @@ jumpButton.addEventListener("pointercancel",()=>{
 });
 
 
-/* MOVEMENT + ANIMATION */
+/* CAMERA ROTATION */
+
+let cameraYaw=0;
+let cameraPitch=.28;
+
+let cameraDragging=false;
+let previousPointerX=0;
+let previousPointerY=0;
+
+canvas.addEventListener("pointerdown",event=>{
+
+ if(event.target.closest("#mobileControls"))return;
+
+ cameraDragging=true;
+
+ previousPointerX=event.clientX;
+ previousPointerY=event.clientY;
+
+ canvas.setPointerCapture(event.pointerId);
+
+});
+
+canvas.addEventListener("pointermove",event=>{
+
+ if(!cameraDragging)return;
+
+ const dx=event.clientX-previousPointerX;
+ const dy=event.clientY-previousPointerY;
+
+ previousPointerX=event.clientX;
+ previousPointerY=event.clientY;
+
+ cameraYaw-=dx*.006;
+ cameraPitch-=dy*.006;
+
+ cameraPitch=THREE.MathUtils.clamp(
+  cameraPitch,-.15,1.1
+ );
+
+});
+
+function stopCameraDrag(){
+ cameraDragging=false;
+}
+
+canvas.addEventListener("pointerup",stopCameraDrag);
+canvas.addEventListener("pointercancel",stopCameraDrag);
+
+
+/* HITBOX + COLLISION */
+
+function makePlayerBox(x,y,z){
+
+ return new THREE.Box3(
+  new THREE.Vector3(
+   x-hitboxWidth/2,
+   y,
+   z-hitboxDepth/2
+  ),
+  new THREE.Vector3(
+   x+hitboxWidth/2,
+   y+playerHeight,
+   z+hitboxDepth/2
+  )
+ );
+
+}
+
+function collidesAt(x,y,z){
+
+ const playerBox=makePlayerBox(x,y,z);
+
+ for(const collider of collisionObjects){
+
+  if(playerBox.intersectsBox(collider.bounds)){
+   return true;
+  }
+
+ }
+
+ return false;
+
+}
+
+
+/* MOVEMENT */
 
 let verticalVelocity=0;
 let jumpLock=false;
@@ -368,14 +547,27 @@ function updatePlayer(dt){
  const forward=(keys.w?1:0)-(keys.s?1:0)-joyY;
  const side=(keys.d?1:0)-(keys.a?1:0)+joyX;
 
- const direction=new THREE.Vector3(side,0,forward);
+ // Movement relative to camera direction.
+ let moveX=side*Math.cos(cameraYaw)-forward*Math.sin(cameraYaw);
+ let moveZ=-side*Math.sin(cameraYaw)-forward*Math.cos(cameraYaw);
+
+ const direction=new THREE.Vector2(moveX,moveZ);
 
  if(direction.length()>1)direction.normalize();
 
  const speed=6;
 
- player.position.x+=direction.x*speed*dt;
- player.position.z+=direction.z*speed*dt;
+ const nextX=player.position.x+direction.x*speed*dt;
+ const nextZ=player.position.z+direction.y*speed*dt;
+
+ // Separate X and Z checks allow sliding along walls.
+ if(!collidesAt(nextX,player.position.y,player.position.z)){
+  player.position.x=nextX;
+ }
+
+ if(!collidesAt(player.position.x,player.position.y,nextZ)){
+  player.position.z=nextZ;
+ }
 
  const moving=direction.length()>.05;
 
@@ -391,20 +583,27 @@ function updatePlayer(dt){
  }else{
 
   [leftArm,rightArm,leftLeg,rightLeg].forEach(part=>{
-   if(part)part.rotation.x=THREE.MathUtils.damp(
-    part.rotation.x,0,8,dt
-   );
+
+   if(part){
+    part.rotation.x=THREE.MathUtils.damp(
+     part.rotation.x,0,8,dt
+    );
+   }
+
   });
 
  }
 
- if(player.position.y<=0){
+ // Jumping.
+ if(player.position.y<=0.001){
 
   player.position.y=0;
 
   if((keys[" "]||jumpPressed)&&!jumpLock){
+
    verticalVelocity=8;
    jumpLock=true;
+
   }
 
  }
@@ -413,24 +612,32 @@ function updatePlayer(dt){
 
  verticalVelocity-=20*dt;
 
- player.position.y=Math.max(
-  0,
-  player.position.y+verticalVelocity*dt
- );
+ player.position.y+=verticalVelocity*dt;
 
- if(player.position.y===0)verticalVelocity=0;
+ if(player.position.y<=0){
 
+  player.position.y=0;
+  verticalVelocity=0;
+
+ }
+
+ // Camera follows the player and rotates around them.
  const target=player.position.clone().add(
-  new THREE.Vector3(0,2,0)
+  new THREE.Vector3(0,1.7,0)
  );
 
- const cameraTarget=target.clone().add(
-  new THREE.Vector3(7,5,8)
+ const distance=9;
+ const horizontal=distance*Math.cos(cameraPitch);
+
+ const cameraTarget=new THREE.Vector3(
+  player.position.x+Math.sin(cameraYaw)*horizontal,
+  player.position.y+2+Math.sin(cameraPitch)*distance,
+  player.position.z+Math.cos(cameraYaw)*horizontal
  );
 
  camera.position.lerp(
   cameraTarget,
-  Math.min(1,dt*4)
+  Math.min(1,dt*8)
  );
 
  camera.lookAt(target);
@@ -478,6 +685,5 @@ function animate(){
 animate();
 
 </script>
-
 </body>
 </html>
